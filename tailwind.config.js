@@ -15,6 +15,10 @@ export default {
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                mirage: "hsl(214, 25%, 11%)",
+                clay: "hsl(212, 19%, 16%)",
+            },
         },
     },
     plugins: [require("flowbite/plugin")],

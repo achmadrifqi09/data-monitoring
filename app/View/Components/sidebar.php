@@ -11,6 +11,11 @@ class sidebar extends Component
     /**
      * Create a new component instance.
      */
+    public $menus = [
+        ['label' => 'Dashboard', 'path' => '/', 'routeName' => 'dashboard'],
+        ['label' => 'BPL', 'path' => '/bpl', 'routeName' => 'bpl.index'],
+        ['label' => 'Rekanan', 'path' => '/rekanan', 'routeName' => 'rekanan.index'],
+    ];
     public function __construct()
     {
         //

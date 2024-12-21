@@ -1,4 +1,4 @@
-<nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+<nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-clay dark:border-gray-700">
     <div class="px-3 py-3 lg:px-5 lg:pl-3">
         <div class="flex items-center justify-between">
             <div class="flex items-center justify-start rtl:justify-end">
@@ -14,7 +14,7 @@
                     </svg>
                 </button>
                 <a href="/" class="flex flex-col gap ms-2 md:me-24">
-                    <span class="block sm:text-xl font-semibold text-gray-900 dark:text-white mb-0">
+                    <span class="block sm:text-xl font-semibold text-mirage dark:text-white mb-0">
                         Monitoring Data
                     </span>
                 </a>
@@ -22,7 +22,7 @@
 
             <div class="flex items-center">
                 <button type="button" id="darkModeButton"
-                    class="p-2 me-2 text-sm text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                    class="p-2 me-2 text-sm text-mirage focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-clay dark:text-gray-100 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                     <span id="darkIcon">
                         <x-solar-moon-stars-bold class="w-5 h-5 dark:text-white text-gray-500 hidden dark:block" />
                     </span>
@@ -33,7 +33,7 @@
                 <div class="flex items-center ms-3 relative">
                     <div>
                         <button type="button"
-                            class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                            class="flex text-sm bg-clay rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
                             aria-expanded="false" data-dropdown-toggle="dropdown-user">
                             <span class="sr-only">Open user menu</span>
                             <img class="w-8 h-8 rounded-full"
