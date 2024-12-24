@@ -1,3 +1,126 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.select2-container .select2-choice {
+    display: block;
+    border-width: 1px;
+    border-radius: 7px;
+    width: 100%;
+    padding: 8px;
+}
+
+.select2 {
+    width: 100% !important;
+    border-radius: 8px;
+}
+
+.dark .select2 {
+    color: white;
+}
+
+.select2-selection {
+    height: 42px;
+    display: flex;
+    align-items: center;
+
+}
+
+.select2-selection__rendered {
+    display: block;
+    margin-top: 6px;
+    font-size: 14px;
+    margin-left: 2px;
+}
+
+.dark .select2-selection__rendered {
+    color: white !important;
+}
+
+.dark .select2-search {
+    background-color: rgb(55 65 81);
+    border: none !important;
+}
+
+.dark .select2-search__field {
+    background-color: rgb(55 65 81);
+    border-radius: 6px;
+    color: white;
+}
+
+.select2-search__field {
+    border-radius: 6px;
+}
+
+.select2-search__field:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 1px rgb(239 68 68);
+}
+
+.light .select2-results__option--highlighted.select2-results__option--selectable {
+    background-color: rgb(243 244 246) !important;
+    color: hsl(214, 25%, 11%) !important;
+}
+
+.dark .select2-container--default .select2-results__option {
+    background-color: rgb(55 65 81);
+    color: white;
+}
+
+.dark .select2-container--default .select2-results__option:hover {
+    background-color: rgb(75 85 99);
+    color: white;
+}
+
+.select2-container--default .select2-results__option:hover {
+    background-color: rgb(243 244 246);
+    color: hsl(214, 25%, 11%);
+}
+
+.dark .select2-dropdown {
+    border: none;
+}
+
+.select2-selection__arrow {
+    display: block;
+    margin-top: 6px;
+    margin-right: 6px;
+}
+
+.select2-container--default .select2-selection--single {
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid rgb(209 213 219);
+    width: 100% !important;
+}
+
+.selection {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dark .select2-container--default .select2-selection--single {
+    background-color: rgb(55 65 81);;
+}
+
+.dark .select2-container--default .select2-selection--single {
+    border: 1px solid rgb(75 85 99);
+}
+
+.dark::-webkit-scrollbar-track {
+    background-color: #212831;
+}
+
+.dark::-webkit-scrollbar {
+    width: 10px;
+    background-color: #2C2C2C;
+}
+
+.dark input {
+    color-scheme: dark;
+}
+
+.dark::-webkit-scrollbar-thumb {
+    background-color: #374151;
+    border-radius: 10px;
+}
