@@ -12,10 +12,10 @@ class sidebar extends Component
      * Create a new component instance.
      */
     public $menus = [
-        ['label' => 'Dashboard', 'path' => '/', 'routeName' => 'dashboard', 'icon' => 'solar-spedometer-max-bold'],
-        ['label' => 'BPL', 'path' => '/bpl', 'routeName' => 'bpl', 'icon' => 'solar-bill-list-bold'],
-        ['label' => 'Rekanan', 'path' => '/rekanan', 'routeName' => 'partner', 'icon' => 'solar-users-group-two-rounded-bold'],
-        ['label' => 'Order', 'path' => '/order', 'routeName' => 'order', 'icon' => 'solar-cart-large-4-bold'],
+        ['label' => 'Dashboard', 'path' => '/', 'routeName' => 'dashboard', 'icon' => 'fa-solid fa-gauge-high'],
+        ['label' => 'BPL', 'path' => '/bpl', 'routeName' => 'bpl', 'icon' => 'fa-solid fa-hammer'],
+        ['label' => 'Rekanan', 'path' => '/rekanan', 'routeName' => 'partner', 'icon' => 'fa-solid fa-people-group'],
+        ['label' => 'Order', 'path' => '/order', 'routeName' => 'order', 'icon' => 'fa-solid fa-cart-shopping'],
     ];
     public function __construct()
     {

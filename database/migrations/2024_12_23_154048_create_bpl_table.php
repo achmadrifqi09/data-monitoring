@@ -15,13 +15,18 @@ return new class extends Migration
             $table->id();
             $table->string('item_name');
             $table->string('unit')->nullable();
+            $table->float('volume')->nullable();
             $table->integer('partner_id')->nullable();
             $table->integer('order_id')->nullable();
+            $table->bigInteger('price')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
             $table->index('item_name');
             $table->index('unit');
+            $table->index('partner_id');
+            $table->index('order_id');
+            $table->index('deleted_at');
         });
     }
 

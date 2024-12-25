@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Imports\BPLImport;
 use App\Models\BPL;
-use App\Models\Partner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -48,6 +47,21 @@ class BPLController extends Controller
         }
     }
 
+    public function getData(Request $request)
+    {
+        $search = $request->input('search');
+        $bplQuery = BPL::whereNull('deleted_at');
+
+        if ($search) {
+            $bplQuery->where(function ($query) use ($search) {
+                $query->where('item_name', 'like', '%' . $search . '%');
+            });
+        }
+
+        $bpl = $bplQuery->take(10)->get();
+        return response()->json($bpl);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -56,7 +70,6 @@ class BPLController extends Controller
 
             notify()->success('Data BPL ditambahkan', 'Berhasil');
             return redirect()->back();
-
         } catch (ValidationException $e) {
             notify()->success($e->getMessage(), 'Gagal');
             return redirect()->back();
@@ -75,7 +88,6 @@ class BPLController extends Controller
                 ]);
             notify()->success('Data BPL berhasil diupdate', 'Berhasil');
             return redirect()->back();
-
         } catch (ValidationException $e) {
             notify()->success($e->getMessage(), 'Gagal');
             return redirect()->back();

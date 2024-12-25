@@ -1,6 +1,5 @@
 import './bootstrap';
 import 'flowbite';
-import 'sweetalert2/src/sweetalert2.scss';
 import Swal from 'sweetalert2';
 
 $(function () {

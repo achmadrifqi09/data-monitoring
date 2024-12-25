@@ -17,7 +17,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/rekanan', [PartnerController::class, 'index'])->name('partner.view');
-    Route::get('/rekanan/data', [PartnerController::class, 'getData'])->name('partner.data');
     Route::post('/rekanan/import', [PartnerController::class, 'import'])->name('partner.import');
     Route::post('/rekanan', [PartnerController::class, 'store'])->name('partner.store');
     Route::patch('/rekanan/{id}', [PartnerController::class, 'update'])->name('partner.update');
@@ -30,6 +29,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/bpl/import', [BPLController::class, 'import'])->name('bpl.import');
 
     Route::get('/order', [OrderController::class, 'index'])->name('order.view');
-    Route::get('/order/form', [OrderController::class, 'form'])->name('order.form');
-});
+    Route::get('/order/form', [OrderController::class, 'add'])->name('order.add');
+    Route::post('/order', [OrderController::class, 'store'])->name('order.store');
+    Route::get('/order/{id}', [OrderController::class, 'show'])->name('order.detail');
+    Route::delete('/order/{id}', [OrderController::class, 'destroy'])->name('order.destroy');
+    Route::post('/order/{id}/items', [OrderController::class, 'addItem'])->name('order.item.add');
+    Route::patch('/order/{orderId}/items/{itemId}', [OrderController::class, 'updateItem'])->name('order.item.update');
+    Route::delete('/order/{orderId}/items/{itemId}', [OrderController::class, 'destroyItem'])->name('order.item.delete');
 
+    Route::get('/api/rekanan', [PartnerController::class, 'getData'])->name('partner.api.get');
+    Route::get('/api/bpl', [BPLController::class, 'getData'])->name('bpl.api.get');
+});

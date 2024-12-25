@@ -19,6 +19,10 @@ return new class extends Migration
             $table->date('po_date');
             $table->date('start_date');
             $table->date('finish_date');
+
+            $table->index('po_number');
+            $table->index('partner_id');
+            $table->index('deleted_at');
             $table->timestamps();
             $table->softDeletes();
         });
