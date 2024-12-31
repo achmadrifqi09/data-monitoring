@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title> @yield('title') | Monitoring Kontrak Proc</title>
+    @notifyCss
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <script>
@@ -20,7 +21,11 @@
 
 <body class="antialiased dark:bg-mirage">
     @yield('content')
-    @yield('scripts')
+    <div class="fixed z-50">
+        <x-notify::notify />
+    </div>
+    @notifyJs
+    @stack('scripts')
     <script src="{{ asset('js/global/jquery-3.7.min.js') }}"></script>
 </body>
 

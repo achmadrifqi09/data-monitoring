@@ -20,8 +20,15 @@
 
                 <x-input-label label="Password" id="password" placeholder="Masukkan password" name="password"
                     type="password" />
+                <div class="flex items-center">
+                    <input id="remember" type="checkbox" value="" name="remember"
+                        class="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                    <label for="remember" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                        Simpan sesi login
+                    </label>
+                </div>
                 @error('credential-error')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                    <span class="text-red-500 text-sm block mt-4">{{ $message }}</span>
                 @enderror
 
                 <div class="mt-6 flex justify-end">

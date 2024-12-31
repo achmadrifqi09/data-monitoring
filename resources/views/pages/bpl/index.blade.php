@@ -65,11 +65,15 @@
                         <td class="min-w-[12em] px-6 py-4">{{ $item->unit }}</td>
                         <td class="px-6 py-4">
                             <div class="flex gap-4">
-                                <button class="edit-button font-semibold text-yellow-400" data-modal-target="edit-bpl"
-                                    data-modal-toggle="edit-bpl" data-partner="{{ json_encode($item) }}">
+                                <button
+                                    class="edit-button font-semibold dark:text-gray-400 hover:dark:text-white text-gray-500"
+                                    data-modal-target="edit-bpl" data-modal-toggle="edit-bpl"
+                                    data-partner="{{ json_encode($item) }}">
                                     <i class="fa-solid fa-pen-to-square text-base"></i>
                                 </button>
-                                <button class="bpl-delete-confirm font-semibold text-red-500" data-id="{{ $item->id }}">
+                                <button
+                                    class="bpl-delete-confirm font-semibold dark:text-gray-400 hover:dark:text-white text-gray-500"
+                                    data-id="{{ $item->id }}">
                                     <i class="fa-solid fa-trash-can text-base"></i>
                                 </button>
                             </div>
@@ -79,7 +83,7 @@
 
                 @if ($bpl->isEmpty())
                     <tr class="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-clay dark:hover:bg-clay/80">
-                        <td class="bg-clay px-6 py-4 text-center" colspan="4">Tidak ada data BPL</td>
+                        <td class="bg-white dark:bg-clay px-6 py-4 text-center" colspan="4">Tidak ada data BPL</td>
                     </tr>
                 @endif
             </tbody>
@@ -141,7 +145,7 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script>
         $(function() {
             $('.edit-button').on('click', function() {
@@ -175,4 +179,4 @@
             });
         })
     </script>
-@endsection
+@endpush

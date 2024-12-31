@@ -1,9 +1,11 @@
 import './bootstrap';
 import 'flowbite';
+import { Modal } from 'flowbite';
 import Swal from 'sweetalert2';
 
 $(function () {
     window.Swal = Swal;
+    window.Modal = Modal;
     const darkModeButton = $('#darkModeButton');
     darkModeButton.on('click', function () {
         if (

@@ -25,7 +25,7 @@ class PartnerController extends Controller
             });
         }
 
-        $partners = $partnersQuery->paginate(10);
+        $partners = $partnersQuery->paginate(15);
         return view('pages.partner.index', [
             'partners' => $partners
         ]);
@@ -58,7 +58,7 @@ class PartnerController extends Controller
             return redirect()->back()->with('success', 'Data berhasil diimpor!');
         } catch (\Throwable $e) {
             notify()->error($e->getMessage(), 'Gagal');
-            return redirect('/rekanan');
+            return redirect('/partner');
         }
     }
 
@@ -70,7 +70,6 @@ class PartnerController extends Controller
 
             notify()->success('Data rekanan ditambahkan', 'Berhasil');
             return redirect()->back();
-
         } catch (ValidationException $e) {
             notify()->success($e->getMessage(), 'Gagal');
             return redirect()->back();
@@ -89,7 +88,6 @@ class PartnerController extends Controller
                 ]);
             notify()->success('Data rekanan berhasil diupdate', 'Berhasil');
             return redirect()->back();
-
         } catch (ValidationException $e) {
             notify()->success($e->getMessage(), 'Gagal');
             return redirect()->back();

@@ -24,4 +24,9 @@ class Order extends Model
     {
         return $this->belongsTo(Partner::class);
     }
+
+    public function item_receiveds(): HasMany
+    {
+        return $this->hasMany(ItemReceived::class);
+    }
 }

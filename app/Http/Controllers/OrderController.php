@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BPL;
+use App\Models\ItemReceived;
 use App\Models\Order;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -11,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-
 
 class OrderController extends Controller
 {
@@ -48,7 +48,7 @@ class OrderController extends Controller
                 }
             });
         }
-        $orders = $orderQuery->paginate(10);
+        $orders = $orderQuery->paginate(15);
 
         return view('pages.order.index', [
             'orders' => $orders
@@ -60,8 +60,10 @@ class OrderController extends Controller
         $order = Order::where('id', $id)
             ->with('partner', 'items')
             ->first();
+        $itemReceiveds = ItemReceived::where('order_id', $id)->with('item')->orderBy('date_received', 'desc')->get();
         return view('pages.order.detail', [
-            'order' => $order
+            'order' => $order,
+            'itemReceiveds' => $itemReceiveds,
         ]);
     }
 

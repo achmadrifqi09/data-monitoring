@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class Wrapper extends Component
+class user-control-header extends Component
 {
     /**
      * Create a new component instance.
@@ -21,6 +21,6 @@ class Wrapper extends Component
      */
     public function render(): View|Closure|string
     {
-    return view('components.wrapper');
+        return view('components.user-control-header');
     }
 }

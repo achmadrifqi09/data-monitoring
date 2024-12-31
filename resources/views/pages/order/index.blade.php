@@ -10,7 +10,7 @@
                 <p class="text-sm dark:text-gray-300 xl:text-base">Pengelolaan data order</p>
             </div>
             <div class="inline-flex h-max rounded-sm" role="group">
-                <a href="/order/form"
+                <a href="/order/c/form"
                     class="rounded-s-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-red-700 focus:z-10 focus:text-red-700 focus:ring-2 focus:ring-red-700 dark:border-gray-700 dark:bg-clay dark:text-white dark:hover:bg-gray-700 dark:hover:text-white dark:focus:text-white dark:focus:ring-red-500">
                     Tambah
                 </a>
@@ -35,7 +35,7 @@
                     <label for="alert" class="sr-only">Jenis alert</label>
                     <select id="alert" name="alert"
                         onchange="if(this.value === 'all' && !document.getElementById('search').value) { window.location.href='{{ route('order.view') }}'; return false; }"
-                        class="w-max bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        class="w-max bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-600 focus:border-red-600 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-red-600 dark:focus:border-red-600">
                         <option value="all" {{ request('alert') == 'all' || !request('alert') ? 'selected' : '' }}>Semua
                         </option>
                         <option value="close" {{ request('alert') == 'close' ? 'selected' : '' }}>Close</option>
@@ -92,7 +92,8 @@
                                         class="edit-button font-semibold text-green-600 dark:text-green-400">
                                         <i class="fa-solid fa-circle-info text-base"></i>
                                     </a>
-                                    <button class="order-delete-confirm font-semibold text-red-500"
+                                    <button
+                                        class="order-delete-confirm font-semibold dark:text-gray-400 hover:dark:text-white text-gray-500"
                                         data-id="{{ $order->id }}">
                                         <i class="fa-solid fa-trash-can text-base"></i>
                                     </button>
@@ -104,7 +105,8 @@
                     @if ($orders->isEmpty())
                         <tr
                             class="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-clay dark:hover:bg-clay/80">
-                            <td class="bg-clay px-6 py-4 text-center" colspan="8">Tidak ada data order</td>
+                            <td class="bg-white dark:bg-clay px-6 py-4 text-center" colspan="8">Tidak ada data order
+                            </td>
                         </tr>
                     @endif
                 </tbody>
@@ -119,7 +121,7 @@
         </form>
     @endsection
 
-    @section('scripts')
+    @push('scripts')
         <script>
             $(document).ready(function() {
                 function calculateDays(targetDate) {
@@ -174,4 +176,4 @@
                 });
             });
         </script>
-    @endsection
+    @endpush

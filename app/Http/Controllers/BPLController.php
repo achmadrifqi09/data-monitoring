@@ -25,7 +25,7 @@ class BPLController extends Controller
             });
         }
 
-        $bpl = $partnersQuery->paginate(10);
+        $bpl = $partnersQuery->paginate(15);
         return view('pages.bpl.index', [
             'bpl' => $bpl,
         ]);

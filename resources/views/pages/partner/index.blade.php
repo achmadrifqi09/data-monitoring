@@ -65,11 +65,14 @@
                         <td class="min-w-[12em] px-6 py-4">{{ $partner->address }}</td>
                         <td class="px-6 py-4">
                             <div class="flex gap-4">
-                                <button class="partner_edit font-semibold text-yellow-400" data-modal-target="edit-partner"
-                                    data-modal-toggle="edit-partner" data-partner="{{ json_encode($partner) }}">
+                                <button
+                                    class="partner_edit font-semibold dark:text-gray-400 hover:dark:text-white text-gray-500"
+                                    data-modal-target="edit-partner" data-modal-toggle="edit-partner"
+                                    data-partner="{{ json_encode($partner) }}">
                                     <i class="fa-solid fa-pen-to-square text-base"></i>
                                 </button>
-                                <button class="delete-confirmation font-semibold text-red-500"
+                                <button
+                                    class="delete-confirmation font-semibold dark:text-gray-400 hover:dark:text-white text-gray-500"
                                     data-id="{{ $partner->id }}">
                                     <i class="fa-solid fa-trash-can text-base"></i>
                                 </button>
@@ -80,14 +83,14 @@
 
                 @if ($partners->isEmpty())
                     <tr class="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-clay dark:hover:bg-clay/80">
-                        <td class="bg-clay px-6 py-4 text-center" colspan="4">Tidak ada data rekanan</td>
+                        <td class="bg-white dark:bg-clay px-6 py-4 text-center" colspan="4">Tidak ada data rekanan</td>
                     </tr>
                 @endif
             </tbody>
         </table>
         <x-modal id="import-partner" title="Import Rekanan">
             <x-slot name="content">
-                <form action="/rekanan/import" method="post" enctype="multipart/form-data">
+                <form action="/partner/import" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="relative">
                         <label class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
@@ -108,7 +111,7 @@
         </x-modal>
         <x-modal id="create-partner" title="Tambah Rekanan">
             <x-slot name="content">
-                <form action="/rekanan" method="post">
+                <form action="/partner" method="post">
                     @csrf
                     <x-input-label id="name" label="Nama Rekanan" name="name" placeholder="Masukkan nama rekanan" />
                     <x-input-label id="address" label="Alamat Rekanan" name="address"
@@ -144,14 +147,14 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script>
         $(function() {
             $('.partner_edit').on('click', function() {
                 const partner = $(this).data('partner');
                 $('#update_name').val(partner.name);
                 $('#update_address').val(partner.address);
-                $('#partner_edit_form').attr('action', `/rekanan/${partner.id}`);
+                $('#partner_edit_form').attr('action', `/partner/${partner.id}`);
             });
 
             $('.delete-confirmation').on('click', function() {
@@ -171,7 +174,7 @@
                     if (result.isConfirmed) {
                         const id = $(this).data('id');
                         const form = $('#partner_form_delete');
-                        form.attr('action', `/rekanan/${id}`);
+                        form.attr('action', `/partner/${id}`);
                         form.trigger('submit');
                         form.preventDefault();
                     }
@@ -179,4 +182,4 @@
             });
         });
     </script>
-@endsection
+@endpush

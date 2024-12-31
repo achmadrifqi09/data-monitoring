@@ -22,7 +22,7 @@
                         </label>
                         <select class=partner_id" id="partner_id" name="partner_id" required></select>
                         @error('partner_id')
-                            <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                            <p class="mt-2 text-sm text-red-600 dark:dark:text-gray-400 hover:dark:text-white text-gray-500">
                                 {{ $message }}
                             </p>
                         @enderror
@@ -70,7 +70,7 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script>
         $(function() {
             $('#partner_id').select2({
@@ -185,4 +185,4 @@
             }
         });
     </script>
-@endsection
+@endpush

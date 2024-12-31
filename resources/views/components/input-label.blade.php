@@ -2,13 +2,14 @@
     'disabled' => false,
     'isSpaceY' => true,
     'label' => 'Label',
+    'value' => '',
     'id',
 ])
 <div class="{{ $isSpaceY ? 'my-4' : 'my-0 w-full' }}">
     <label for="{{ $id }}" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
         {{ $label }}
     </label>
-    <input id="{{ $id }}" {{ $disabled ? 'disabled' : '' }} value="{{ old($attributes->get('name')) }}"
+    <input id="{{ $id }}" {{ $disabled ? 'disabled' : '' }} value="{{ old($attributes->get('name'), $value) }}"
         {!! $attributes->merge([
             'type' => 'text',
             'class' =>
@@ -16,7 +17,7 @@
         ]) !!} />
 
     @error($attributes->get('name'))
-        <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+        <p class="mt-2 text-sm text-red-600 dark:text-red-500 error-message">
             {{ $message }}
         </p>
     @enderror

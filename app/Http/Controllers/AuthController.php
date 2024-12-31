@@ -23,8 +23,13 @@ class AuthController extends Controller
             'password.min' => 'Password tidak boleh kurang dari 8 karakter',
             'username.min' => 'Username tidak boleh kurang dari 4 karakter'
         ]);
-
-        if (auth()->attempt($request->only(['username', 'password']))) {
+        $isRemember = $request->has('remember');
+        if (auth()->attempt($request->only(['username', 'password']), $isRemember)) {
+            if (auth()->user()->status == 0 || auth()->user()->deleted_at) {
+                auth()->logout();
+                notify()->error('Akun dinonaktifkan', 'Authentikasi Gagal');
+                return redirect('/login');
+            }
             return redirect('/');
         } else {
             return back()->withErrors(['credential-error' => 'Username atau password salah']);
