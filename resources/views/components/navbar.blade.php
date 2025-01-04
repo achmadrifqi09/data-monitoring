@@ -13,9 +13,9 @@
                         </path>
                     </svg>
                 </button>
-                <a href="/" class="gap-2 items-center ms-2 flex md:me-24">
-                    <img alt="logo" src="{{ asset('/images/logo.png') }}" class="w-8 h-8" />
-                    <div class="relative">
+                <a href="/" class="gap-4 items-center ms-2 flex md:me-24">
+                    <img alt="logo" src="{{ asset('/images/full-logo.png') }}" class="w-auto h-8" />
+                    <div class="relative hidden sm:block">
                         <span class="block text-xs text-gray-600 dark:text-white relative -bottom-1">
                             Monitoring data
                         </span>

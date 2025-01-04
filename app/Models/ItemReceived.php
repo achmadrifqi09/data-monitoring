@@ -10,11 +10,16 @@ class ItemReceived extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['bpl_id', 'order_id', 'amount_received', 'date_received'];
+    protected $fillable = ['item_id', 'bpl_number', 'order_id', 'amount_received', 'date_received'];
     protected $dates = ['deleted_at'];
 
     public function item(): BelongsTo
     {
-        return $this->belongsTo(BPL::class, 'bpl_id');
+        return $this->belongsTo(Item::class, 'item_id');
+    }
+
+    public function bpl(): BelongsTo
+    {
+        return $this->belongsTo(BPL::class, 'bpl_number');
     }
 }

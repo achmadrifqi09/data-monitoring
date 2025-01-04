@@ -2,72 +2,102 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ItemReceivedRequest;
 use App\Models\BPL;
+use App\Models\Item;
 use App\Models\ItemReceived;
-use Illuminate\Support\Facades\DB;
+use App\Models\Order;
+use Exception;
+use Illuminate\Http\Request;
 
 class ItemReceivedController extends Controller
 {
-    public function store(ItemReceivedRequest $request)
+    public function form(Request $request)
+    {
+        $orderId = $request->query('order_id');
+        if (!$orderId) {
+            notify()->error('Url penerimaan barang tidak valid', 'Terjadi Kesalahan');
+            return redirect()->back();
+        }
+
+        $order = Order::where('id', (int)$orderId)->select('id', 'po_number')->first();
+        if (!$order) {
+            notify()->error('Data order tidak ditemukan', 'Terjadi Kesalahan');
+            return redirect()->back();
+        }
+
+        $BPLs = BPL::where('order_id', $orderId)
+            ->whereNull('deleted_at')
+            ->with([
+                'items' => function ($query) {
+                    $query->where('is_selected', 1)
+                        ->whereNull('deleted_at')
+                        ->with([
+                            'item_receiveds' => function ($query) {
+                                $query->whereNull('deleted_at');
+                            }
+                        ]);
+                }
+            ])
+            ->get();
+
+        return view('pages.order.item-received-form', [
+            'BPLs' => $BPLs,
+            'po_number' => $order->po_number,
+            'order_id' => $order->id,
+        ]);
+    }
+    public function store(Request $request)
     {
         try {
-            $input = $request->validated();
-            $orderId = $input['order_id'];
-            $receivedItems = collect($input['received_items']);
+            $payload = [];
+            $BPLs = $request->input('bpl');
+            $orderId = $request->input('order_id');
+            $itemIds = [];
 
-            $bplIds = $receivedItems->pluck('bpl_id')->toArray();
-
-            $existingTotals = DB::table('item_receiveds')
-                ->select('bpl_id', DB::raw('SUM(amount_received) as total_received'))
-                ->whereNull('deleted_at')
-                ->whereIn('bpl_id', $bplIds)
-                ->groupBy('bpl_id')
-                ->pluck('total_received', 'bpl_id')
-                ->toArray();
-
-            $bplVolumes = BPL::select('id', 'volume')
-                ->whereNull('deleted_at')
-                ->whereIn('id', $bplIds)
-                ->get()
-                ->keyBy('id');
-
-            return DB::transaction(function () use ($receivedItems, $bplVolumes, $existingTotals, $orderId) {
-                foreach ($receivedItems as $item) {
-                    $bplId = $item['bpl_id'];
-                    $bpl = $bplVolumes->get($bplId);
-
-                    if (!$bpl) {
-                        throw new \Exception("BPL ID {$bplId} tidak ditemukan");
-                    }
-
-                    $currentTotal = $existingTotals[$bplId] ?? 0;
-                    $newTotal = $currentTotal + floatval($item['amount_received']);
-
-                    if ($newTotal > $bpl->volume) {
-                        throw new \Exception("Volume diterima untuk BPL ID {$bplId} melebihi jumlah order");
+            foreach ($BPLs as $inputItem) {
+                foreach ($inputItem['items'] as $item) {
+                    if ($item['amount_received'] && $item['amount_received'] != 0) {
+                        $itemIds[] = (int)$item['item_id'];
+                        $payload[] = [
+                            'bpl_number' => $inputItem['bpl_number'],
+                            'item_id' => (int)$item['item_id'],
+                            'order_id' => (int)$orderId,
+                            'amount_received' => (int)$item['amount_received'],
+                            'date_received' =>  $item['received_date'],
+                            'nominal' => floatval($item['amount_received']) * intval($item['price'])
+                        ];
                     }
                 }
+            }
 
-                $dataToInsert = $receivedItems->map(function ($item) use ($orderId) {
-                    return [
-                        'order_id' => $orderId,
-                        'bpl_id' => $item['bpl_id'],
-                        'amount_received' => $item['amount_received'],
-                        'date_received' => $item['received_date'],
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                })->toArray();
-
-                foreach (array_chunk($dataToInsert, 1000) as $chunk) {
-                    ItemReceived::insert($chunk);
-                }
-
-                notify()->success('Data berhasil disimpan', 'Berhasil');
+            if (empty($itemIds)) {
+                notify()->warning('Tidak ada item yang ditambahkan ke penerimaan barang', 'Peringatan');
                 return redirect()->back();
-            });
-        } catch (\Exception $e) {
+            }
+
+            $items = Item::whereIn('id', $itemIds)->with(['item_receiveds' => function ($query) {
+                $query->whereNull('deleted_at');
+            }])->get();
+
+            foreach ($payload as $payloadItem) {
+                foreach ($items as $item) {
+                    if ($payloadItem['item_id'] === $item->id) {
+                        $volumeUsed = 0;
+                        foreach ($item->item_receiveds as $itemReceived) {
+                            $volumeUsed += $itemReceived->amount_received;
+                        }
+                        $volumeUsed += (int)$payloadItem['amount_received'];
+                        if ($volumeUsed > $item->volume) {
+
+                            throw new Exception("Item diterima melebihi volume order (Item $item->id)");
+                        }
+                    }
+                }
+            }
+            ItemReceived::insert($payload);
+            notify()->success('Penerimaan item berhasil disimpan', 'Berhasil');
+            return redirect("/order/$orderId");
+        } catch (Exception $e) {
             notify()->error($e->getMessage(), 'Gagal');
             return redirect()->back();
         }

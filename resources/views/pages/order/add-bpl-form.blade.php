@@ -4,46 +4,15 @@
 
 @section('content')
     <div>
-        <h4 class="mt-4 text-xl font-medium">Formulir Tambah Order</h4>
-        <p class="text-sm dark:text-gray-300 xl:text-base">
-            Tanda asteris
-            <span class="font-semibold italic">(*)</span>
-            pada field wajib diisi
+        <h4 class="mt-4 text-xl font-medium">Formulir Tambah BPL</h4>
+        <p class="text-sm dark:text-gray-300">
+            Tambah BPL ke order {{ $order->po_number }}
         </p>
         <div class="mt-6">
-            <form method="post" action="/order">
+            <form method="post" action="/order/{{ $order->id }}/bpl">
                 @csrf
+                <input hidden="text" value="{{ $order->partner->id }}" name="partner_id">
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
-                    <x-input-label id="po_number" label="Nomor PO *" name="po_number" placeholder="Masukkan nomor PO"
-                        :isSpaceY="false" value="{{ old('po_number') }}" required />
-                    <div class="w-full text-mirage">
-                        <label for="partner_id" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                            Rekanan *
-                        </label>
-                        <select class=partner_id" id="partner_id" name="partner_id" required></select>
-                        @error('partner_id')
-                            <p class="mt-2 text-sm text-red-600 dark:dark:text-gray-400 hover:dark:text-white">
-                                {{ $message }}
-                            </p>
-                        @enderror
-                    </div>
-                    <x-input-label id="description" label="Uraian" name="description" placeholder="Masukkan uraian"
-                        :isSpaceY="false" value="{{ old('description') }}" />
-                    <x-input-label id="po_date" type="date" label="Tanggal PO *" name="po_date" :isSpaceY="false"
-                        value="{{ old('po_date') }}" required />
-                    <x-input-label id="start_date" type="date" label="Start *" name="start_date" :isSpaceY="false"
-                        value="{{ old('po_start') }}" required />
-                    <x-input-label id="finish_date" type="date" label="Finish *" name="finish_date" :isSpaceY="false"
-                        value="{{ old('po_finish') }}" required />
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="space-y-2">
-                                @foreach ($errors->all() as $error)
-                                    <li class="text-red-600">{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
                     <div
                         class="w-full p-4 border rounded-lg border-dashed border-gray-300  dark:border-gray-600 sm:col-span-2">
                         <p class="font-medium text-sm mb-4">Tambah BPL *</p>
@@ -78,35 +47,10 @@
 @push('scripts')
     <script>
         $(function() {
-            $('#partner_id').select2({
-                ajax: {
-                    url: '{{ route('partner.api.get') }}',
-                    delay: 350,
-                    dataType: 'json',
-                    data: function(params) {
-                        const query = {
-                            search: params.term,
-                        }
-                        return query;
-                    },
-                    processResults: function(data) {
-                        const result = data?.map((partner) => {
-                            return {
-                                id: partner.id,
-                                text: partner.name
-                            }
-                        })
-                        return {
-                            results: result
-                        };
-                    },
-                    cache: true
-                }
-            });
             const defaultBPLSelect = $('#bpl-0');
             defaultBPLSelect.select2({
                 ajax: {
-                    url: '/api/bpl?not_used=1',
+                    url: '/api/bpl?order={{ $order->id }}',
                     delay: 350,
                     dataType: 'json',
                     data: function(params) {
@@ -169,17 +113,34 @@
                                     class="h-4 w-4 md:mt-4 rounded border-gray-300 bg-gray-100 text-red-600 focus:ring-2 focus:ring-red-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-red-600"
                                 />
                                 <input type="number" name="bpl[${counter}][items][${index}][id]" value="${item.id}" hidden>
-                                <x-input-label id="item-name-${counter}-${index}" type="text" label="Nama Item"
-                                    name="bpl[${counter}][items][${index}][item_name]" value="${item?.item_name}" class="disabled:cursor-not-allowed"
-                                    :isSpaceY="false" disabled/>
-                                <x-input-label id="volume-${counter}-${index}" type="number" label="Volume"
+                                <x-input-label 
+                                    id="item-name-${counter}-${index}" 
+                                    type="text" label="Nama Item"
+                                    name="bpl[${counter}][items][${index}][item_name]"
+                                    value="${item?.item_name}" 
+                                    class="disabled:cursor-not-allowed"
+                                    :isSpaceY="false" 
+                                    disabled
+                                    />
+                                <x-input-label 
+                                    id="volume-${counter}-${index}"
+                                    type="number"
+                                    label="Volume"
                                     name="bpl[${counter}][items][${index}][volume]"
-                                    :isSpaceY="false"/>
-                                <x-input-label id="price-${counter}-${index}" type="number" label="Harga"
-                                    name="bpl[${counter}][items][${index}][price]" :isSpaceY="false"/>
+                                    :isSpaceY="false"
+                                    />
+                                <x-input-label 
+                                    id="price-${counter}-${index}"
+                                    type="number"
+                                    label="Harga"
+                                    name="bpl[${counter}][items][${index}][price]" 
+                                    :isSpaceY="false"
+                                    />
                             </div>
                         `;
-                        container.append(newInputRow);
+                        if (item.is_selected !== 1) {
+                            container.append(newInputRow);
+                        }
                     });
 
                     $("input[type='checkbox']").on('change', function() {
@@ -234,7 +195,7 @@
             function generateOptions(id) {
                 $(`#${id}`).select2({
                     ajax: {
-                        url: '/api/bpl?not_used=1',
+                        url: '/api/bpl?order={{ $order->id }}',
                         delay: 350,
                         dataType: 'json',
                         data: function(params) {

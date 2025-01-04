@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('item_receiveds', function (Blueprint $table) {
+        Schema::create('order_backup_scans', function (Blueprint $table) {
             $table->id();
-            $table->string('bpl_number');
-            $table->integer('item_id');
-            $table->integer('order_id');
-            $table->double('amount_received');
-            $table->string('nominal');
-            $table->date('date_received');
+            $table->foreignId('order_id')
+                ->references('id')
+                ->on('orders')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
+            $table->string('document');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('item_receiveds');
+        Schema::dropIfExists('order_backup_scans');
     }
 };

@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Imports\BPLImport;
 use App\Models\BPL;
+use App\Models\Item;
+use App\Models\Order;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -15,18 +18,17 @@ class BPLController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = $request->input('search');
-        $partnersQuery = BPL::whereNull('deleted_at');
-
-        if ($search) {
-            $partnersQuery->where(function ($query) use ($search) {
-                $query->where('item_name', 'like', '%' . $search . '%')
-                    ->orWhere('unit', 'like', '%' . $search . '%');
-            });
-        }
-
-        $bpl = $partnersQuery->paginate(15);
+        $bpl = $this->getBpl($request);
         return view('pages.bpl.index', [
+            'bpl' => $bpl,
+        ]);
+    }
+
+    public function show(int $id): View
+    {
+        $bpl = BPL::where('id', $id)->with('items')->first();
+
+        return view('pages.bpl.detail', [
             'bpl' => $bpl,
         ]);
     }
@@ -47,74 +49,84 @@ class BPLController extends Controller
         }
     }
 
-    public function getData(Request $request)
+    public function getData(Request $request): JsonResponse
     {
-        $search = $request->input('search');
-        $bplQuery = BPL::whereNull('deleted_at');
-
-        if ($search) {
-            $bplQuery->where(function ($query) use ($search) {
-                $query->where('item_name', 'like', '%' . $search . '%');
-            });
-        }
-
-        $bpl = $bplQuery->take(10)->get();
+        $bpl = $this->getBpl($request);
         return response()->json($bpl);
     }
+
 
     public function store(Request $request): RedirectResponse
     {
         try {
-            $data = $this->validateData($request->input());
-            BPL::create($data);
+            $data = $this->validation($request);
 
-            notify()->success('Data BPL ditambahkan', 'Berhasil');
-            return redirect()->back();
+            $bpl = BPL::create([
+                'bpl_number' => $data['bpl_number'],
+                'description' => $data['description'],
+                'date_of_use' => $data['date_of_use'],
+            ]);
+
+            notify()->success('Data BPL ditambahkan, silakan masukkan item', 'Berhasil');
+            return redirect("/bpl/$bpl->bpl_number/form");
         } catch (ValidationException $e) {
-            notify()->success($e->getMessage(), 'Gagal');
+            notify()->error($e->getMessage(), 'Gagal');
             return redirect()->back();
         }
     }
 
-    public function update(Request $request, $id): RedirectResponse
+    public function update(Request $request, int $id): RedirectResponse
     {
         try {
-            $data = $this->validateData($request->except('_token', '_method'));
+            $data = $this->validation($request);
 
-            BPL::where('id', $id)
-                ->update([
-                    'item_name' => $data['item_name'],
-                    'unit' => $data['unit'],
-                ]);
+            $bpl = BPL::find($id);
+
+            if (!$bpl) {
+                notify()->error('Data BPL tidak ditemukan', 'Gagal');
+                return redirect()->back();
+            }
+
+            $oldBPLNumber = $bpl->bpl_number;
+            $bpl->update($data);
+            Item::where('bpl_number', $oldBPLNumber)->update(['bpl_number' => $bpl->bpl_number]);
+
             notify()->success('Data BPL berhasil diupdate', 'Berhasil');
             return redirect()->back();
         } catch (ValidationException $e) {
-            notify()->success($e->getMessage(), 'Gagal');
+            notify()->error($e->getMessage(), 'Gagal');
             return redirect()->back();
         }
-    }
-
-    public function destroy($id): RedirectResponse
-    {
-        $bpl = BPL::find($id);
-        if (!$bpl) {
-            notify()->error('Data BPL tidak ditemukan', 'Gagal');
-            return redirect()->back();
-        }
-        $bpl->delete();
-        notify()->success('Data BPL telah dihapus', 'Berhasil');
-        return redirect()->back();
     }
 
     /**
      * @throws ValidationException
      */
-    private function validateData($input)
+    private function validation(Request $request): array
     {
-        $validator = Validator::make($input, [
-            'item_name' => 'required|min:4',
-            'unit' => 'nullable',
-        ], ['item_name.required' => 'Nama item harus diisi', 'item_name.min' => 'Nama item minimal 4 karakter']);
+        $bplId = $request->route('id');
+
+        $rules = [
+            'bpl_number' => 'required|min:1|unique:bpl',
+            'description' => 'required|min:4',
+            'date_of_use' => 'required|date'
+        ];
+
+        $messages = [
+            'bpl_number.required' => 'Nomor BPL harus diisi',
+            'bpl_number.min' => 'Nomor BPL minimal 1 karakter',
+            'description.required' => 'Uraian harus diisi',
+            'description.min' => 'Uraian minimal 4 karakter',
+            'date_of_use.required' => 'Tanggal rencana pakai harus diisi',
+            'date_of_use.date' => 'Tanggal rencana pakai harus berupa tanggal',
+            'bpl_number.unique' => 'Nomor BPL sudah digunakan',
+        ];
+
+        if ($request->isMethod('patch')) {
+            $rules['bpl_number'] = 'required|min:1|unique:bpl' . ",id,$bplId";
+        }
+
+        $validator = Validator::make($request->except('_token'), $rules, $messages);
 
         if ($validator->fails()) {
             $error = $validator->errors()->first();
@@ -123,6 +135,52 @@ class BPLController extends Controller
             ]);
         }
 
-        return $input;
+        return $request->except(['_token', '_method']);
+    }
+
+    public function destroy(string $bpl_number): RedirectResponse
+    {
+        $bpl = BPL::where('bpl_number', $bpl_number)->first();
+
+        if (!$bpl) {
+            notify()->error('Data BPL tidak ditemukan', 'Gagal');
+            return redirect()->back();
+        }
+
+        $bpl->delete();
+        Item::where('bpl_number', $bpl_number)->delete();
+
+        notify()->success('Data BPL telah dihapus', 'Berhasil');
+        return redirect('/bpl');
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public function getBpl(Request $request): mixed
+    {
+        $search = $request->input('search');
+        $notUsedStatus = $request->query('not_used');
+        $orderId = $request->query('order');
+        $bplQuery = BPL::whereNull('deleted_at');
+
+        if ($search) {
+            $bplQuery->where('bpl_number', 'like', '%' . $search . '%')
+                ->orWhereHas('items', function ($query) use ($search) {
+                    $query->where('description', 'like', '%' . $search . '%');
+                });
+        }
+
+        if ($notUsedStatus && $notUsedStatus === '1') {
+            $bplQuery->whereNull('order_id');
+        }
+
+        if ($orderId) {
+            $bplQuery->where('order_id', $orderId)
+                ->orWhere('order_id', null);
+        }
+
+        return $bplQuery->with('items')->paginate(15);
     }
 }

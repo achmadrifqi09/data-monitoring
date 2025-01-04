@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
@@ -15,7 +14,7 @@ class Order extends Model
     protected $fillable = ['po_number', 'partner_id', 'description', 'po_date', 'start_date', 'finish_date'];
     protected $dates = ['deleted_at'];
 
-    public function items(): HasMany
+    public function bpl(): HasMany
     {
         return $this->hasMany(BPL::class);
     }
@@ -28,5 +27,10 @@ class Order extends Model
     public function item_receiveds(): HasMany
     {
         return $this->hasMany(ItemReceived::class);
+    }
+
+    public function order_backup_scans(): HasMany
+    {
+        return $this->hasMany(OrderBackupScan::class, 'order_id');
     }
 }

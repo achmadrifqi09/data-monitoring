@@ -26,7 +26,7 @@
     </div>
     @notifyJs
     @stack('scripts')
-    <script src="{{ asset('js/global/jquery-3.7.min.js') }}"></script>
+    <script src="{{ asset('js/global/jquery-3.3.1.min.js') }}"></script>
 </body>
 
 </html>

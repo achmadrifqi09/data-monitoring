@@ -54,6 +54,7 @@
                     <th scope="col" class="w-16 px-6 py-3">No</th>
                     <th scope="col" class="px-6 py-3">Nama Rekanan</th>
                     <th scope="col" class="px-6 py-3">Alamat</th>
+                    <th scope="col" class="px-6 py-3">No HP/Kontak</th>
                     <th scope="col" class="px-6 py-3">Aksi</th>
                 </tr>
             </thead>
@@ -62,6 +63,7 @@
                     <tr class="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-clay dark:hover:bg-clay/80">
                         <td class="w-16 px-6 py-4">{{ str_pad($partner->id, 3, '0', STR_PAD_LEFT) }}</td>
                         <td class="min-w-[8em] px-6 py-4">{{ $partner->name }}</td>
+                        <td class="min-w-[12em] px-6 py-4">{{ $partner->phone_number }}</td>
                         <td class="min-w-[12em] px-6 py-4">{{ $partner->address }}</td>
                         <td class="px-6 py-4">
                             <div class="flex gap-4">
@@ -83,7 +85,7 @@
 
                 @if ($partners->isEmpty())
                     <tr class="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-clay dark:hover:bg-clay/80">
-                        <td class="bg-white dark:bg-clay px-6 py-4 text-center" colspan="4">Tidak ada data rekanan</td>
+                        <td class="bg-white dark:bg-clay px-6 py-4 text-center" colspan="5">Tidak ada data rekanan</td>
                     </tr>
                 @endif
             </tbody>
@@ -114,6 +116,7 @@
                 <form action="/partner" method="post">
                     @csrf
                     <x-input-label id="name" label="Nama Rekanan" name="name" placeholder="Masukkan nama rekanan" />
+                    <x-input-label type="number" id="phone_number" label="Nomor Hp" name="phone_number" placeholder="Masukkan nomor hp/kotak" />
                     <x-input-label id="address" label="Alamat Rekanan" name="address"
                         placeholder="Masukkan alamat rekanan" />
                     <div class="mt-6 flex w-full justify-end p-0">
@@ -129,6 +132,8 @@
                     @csrf
                     <x-input-label id="update_name" label="Nama Rekanan" name="name"
                         placeholder="Masukkan nama rekanan" />
+                    <x-input-label type="number" id="update_phone_number" label="Nomor Hp" name="phone_number"
+                                   placeholder="Masukkan alamat rekanan" />
                     <x-input-label id="update_address" label="Alamat Rekanan" name="address"
                         placeholder="Masukkan alamat rekanan" />
                     <div class="mt-6 flex w-full justify-end p-0">
@@ -154,6 +159,7 @@
                 const partner = $(this).data('partner');
                 $('#update_name').val(partner.name);
                 $('#update_address').val(partner.address);
+                $('#update_phone_number').val(partner.phone_number);
                 $('#partner_edit_form').attr('action', `/partner/${partner.id}`);
             });
 

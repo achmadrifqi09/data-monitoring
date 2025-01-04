@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Partner extends Model
 {
     use SoftDeletes;
-    protected $fillable = ['name', 'address'];
+    protected $fillable = ['name', 'address', 'phone_number'];
     protected $dates = ['deleted_at'];
 
     public function orders(): HasMany

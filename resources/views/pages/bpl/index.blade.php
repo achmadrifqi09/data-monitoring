@@ -8,20 +8,29 @@
             <h4 class="text-xl font-medium">BPL</h4>
             <p class="text-sm dark:text-gray-300 xl:text-base">Pengelolaan data BPL</p>
         </div>
-        <div class="inline-flex h-max rounded-sm" role="group">
-            <button type="button" data-modal-target="create-bpl" data-modal-toggle="create-bpl"
-                class="rounded-s-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-red-700 focus:z-10 focus:text-red-700 focus:ring-2 focus:ring-red-700 dark:border-gray-700 dark:bg-clay dark:text-white dark:hover:bg-gray-700 dark:hover:text-white dark:focus:text-white dark:focus:ring-red-500">
-                Tambah
-            </button>
-            <button type="button"
-                class="border-b border-t border-gray-200 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-red-700 focus:z-10 focus:text-red-700 focus:ring-2 focus:ring-red-700 dark:border-gray-700 dark:bg-clay dark:text-white dark:hover:bg-gray-700 dark:hover:text-white dark:focus:text-white dark:focus:ring-red-500">
-                Export
-            </button>
-            <button type="button" data-modal-target="import-bpl" data-modal-toggle="import-bpl"
-                class="rounded-e-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-red-700 focus:z-10 focus:text-red-700 focus:ring-2 focus:ring-red-700 dark:border-gray-700 dark:bg-clay dark:text-white dark:hover:bg-gray-700 dark:hover:text-white dark:focus:text-white dark:focus:ring-red-500">
-                Import
-            </button>
-        </div>
+        @if (auth()->user()->can('bpl_create') || auth()->user()->can('bpl_export') || auth()->user()->can('bpl_import'))
+            <div class="inline-flex h-max rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700"
+                role="group">
+                @can('bpl_create')
+                    <button type="button" data-modal-target="create-bpl" data-modal-toggle="create-bpl"
+                        class="bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-red-700 dark:bg-clay dark:text-white dark:hover:bg-gray-700 dark:hover:text-white">
+                        Tambah
+                    </button>
+                @endcan
+                @can('bpl_export')
+                    <button type="button"
+                        class="border-l border-gray-200 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-red-700  dark:border-gray-700 dark:bg-clay dark:text-white dark:hover:bg-gray-700 dark:hover:text-white ">
+                        Export
+                    </button>
+                @endcan
+                @can('bpl_import')
+                    <button type="button" data-modal-target="import-bpl" data-modal-toggle="import-bpl"
+                        class="border-l border-gray-200 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-100 hover:text-red-700 dark:border-gray-700 dark:bg-clay dark:text-white dark:hover:bg-gray-700 dark:hover:text-white">
+                        Import
+                    </button>
+                @endcan
+            </div>
+        @endif
     </div>
 
     <div>
@@ -52,42 +61,46 @@
             <thead class="bg-gray-100 text-xs uppercase text-mirage dark:bg-gray-700 dark:text-white">
                 <tr>
                     <th scope="col" class="w-16 px-6 py-3">No</th>
-                    <th scope="col" class="px-6 py-3">Nama Item</th>
-                    <th scope="col" class="px-6 py-3">Satuan</th>
+                    <th scope="col" class="px-6 py-3">No BPL</th>
+                    <th scope="col" class="px-6 py-3">Jumlah Item</th>
+                    <th scope="col" class="px-6 py-3">Uraian</th>
+                    <th scope="col" class="px-6 py-3">Tanggal Rencana Pakai</th>
                     <th scope="col" class="px-6 py-3">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($bpl as $item)
+                @forelse ($bpl as $bplItem)
                     <tr class="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-clay dark:hover:bg-clay/80">
                         <td class="w-16 px-6 py-4">{{ $loop->iteration }}</td>
-                        <td class="min-w-[8em] px-6 py-4">{{ $item->item_name }}</td>
-                        <td class="min-w-[12em] px-6 py-4">{{ $item->unit }}</td>
-                        <td class="px-6 py-4">
-                            <div class="flex gap-4">
-                                <button
-                                    class="edit-button font-semibold dark:text-gray-400 hover:dark:text-white text-gray-500"
-                                    data-modal-target="edit-bpl" data-modal-toggle="edit-bpl"
-                                    data-partner="{{ json_encode($item) }}">
-                                    <i class="fa-solid fa-pen-to-square text-base"></i>
-                                </button>
-                                <button
-                                    class="bpl-delete-confirm font-semibold dark:text-gray-400 hover:dark:text-white text-gray-500"
-                                    data-id="{{ $item->id }}">
+                        <td class="min-w-[8em] px-6 py-4">{{ $bplItem->bpl_number }}</td>
+                        <td class="min-w-[12em] px-6 py-4">{{ count($bplItem->items) }} item</td>
+                        <td class="min-w-[12em] px-6 py-4">
+                            {{$bplItem->description ?? '-'}}
+                        </td>
+                    <td class="min-w-[12em] px-6 py-4">{{ $bplItem->date_of_use ?? '-' }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-4">
+                            <a href="/bpl/{{ $bplItem->id }}"
+                                class="edit-button font-semibold text-gray-400 hover:dark:text-white hover:text-gray-600">
+                                <i class="fa-solid fa-circle-info text-base"></i>
+                            </a>
+                            @can('bpl_delete')
+                                <button data-bpl-number="{{ $bplItem->bpl_number }}"
+                                    class="bpl-delete-confirm font-semibold text-gray-400 hover:dark:text-white hover:text-gray-600">
                                     <i class="fa-solid fa-trash-can text-base"></i>
                                 </button>
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-
-                @if ($bpl->isEmpty())
-                    <tr class="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-clay dark:hover:bg-clay/80">
-                        <td class="bg-white dark:bg-clay px-6 py-4 text-center" colspan="4">Tidak ada data BPL</td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
+                            @endcan
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr class="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-clay dark:hover:bg-clay/80">
+                    <td class="bg-white dark:bg-clay px-6 py-4 text-center" colspan="6">Tidak ada data BPL</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+    @can('bpl_import')
         <x-modal id="import-bpl" title="Import BPL">
             <x-slot name="content">
                 <form action="/bpl/import" method="post" enctype="multipart/form-data">
@@ -109,74 +122,63 @@
                 </form>
             </x-slot>
         </x-modal>
+    @endcan
+    @can('bpl_create')
         <x-modal id="create-bpl" title="Tambah BPL">
             <x-slot name="content">
                 <form action="/bpl" method="post">
                     @csrf
-                    <x-input-label id="item_name" label="Nama Item" name="item_name" placeholder="Masukkan nama item" />
-                    <x-input-label id="unit" label="Satuan" name="unit" placeholder="Masukkan satuan item" />
+                    <x-input-label id="bpl_number" label="Nomor BPL" name="bpl_number" placeholder="Masukkan nomor BPL"
+                        required min="1" />
+                    <x-input-label id="description" label="Uraian *" name="description" placeholder="Masukkan uraian"
+                                   required />
+                    <x-input-label type="date" id="date-of-use" label="Tanggal Rencana Pakai *" name="date_of_use"
+                                   placeholder="Masukkan tanggal rencana pakai" required />
                     <div class="mt-6 flex w-full justify-end p-0">
                         <x-button type="submit" class="mr-0 w-auto">Submit</x-button>
                     </div>
                 </form>
             </x-slot>
         </x-modal>
-        <x-modal id="edit-bpl" title="Update BPL">
-            <x-slot name="content">
-                <form method="post" id="edit_form">
-                    @method('patch')
-                    @csrf
-                    <x-input-label id="update_item_name" label="Nama Unit" name="item_name"
-                        placeholder="Masukkan nama item" />
-                    <x-input-label id="update_unit" label="Satuan" name="unit" placeholder="Masukkan satuan item" />
-                    <div class="mt-6 flex w-full justify-end p-0">
-                        <x-button type="submit" class="mr-0 w-auto">Submit</x-button>
-                    </div>
-                </form>
-            </x-slot>
-        </x-modal>
+    @endcan
+    @can('bpl_delete')
         <form id="bpl_form_delete" method="POST">
             @method('delete')
             @csrf
         </form>
-    </div>
-    <div class="mt-4">
-        {{ $bpl->links() }}
-    </div>
+    @endcan
+</div>
+<div class="mt-4">
+    {{ $bpl->links() }}
+</div>
 @endsection
 
 @push('scripts')
-    <script>
-        $(function() {
-            $('.edit-button').on('click', function() {
-                const partner = $(this).data('partner');
-                $('#update_item_name').val(partner.item_name);
-                $('#update_unit').val(partner.unit);
-                $('#edit_form').attr('action', `/bpl/${partner.id}`);
+<script>
+    $(function() {
+        $('.bpl-delete-confirm').on('click', function() {
+            const theme = localStorage.getItem('theme');
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: 'Apakah anda yakin akan menghapus data BPL tersebut?',
+                icon: 'warning',
+                background: theme === 'dark' ? '#212830' : '#fff',
+                color: theme === 'dark' ? '#fff' : '#151B23',
+                showCancelButton: true,
+                confirmButtonColor: '#374557',
+                cancelButtonColor: '#DA2829',
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batal',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const bplNumber = $(this).data('bpl-number');
+                    const form = $('#bpl_form_delete');
+                    form.attr('action', `/bpl/${bplNumber}`);
+                    form.trigger('submit');
+                    form.preventDefault();
+                }
             });
-            $('.bpl-delete-confirm').on('click', function() {
-                const theme = localStorage.getItem('theme');
-                Swal.fire({
-                    title: 'Konfirmasi',
-                    text: 'Apakah anda yakin akan menghapus data BPL tersebut?',
-                    icon: 'warning',
-                    background: theme === 'dark' ? '#212830' : '#fff',
-                    color: theme === 'dark' ? '#fff' : '#151B23',
-                    showCancelButton: true,
-                    confirmButtonColor: '#374557',
-                    cancelButtonColor: '#DA2829',
-                    confirmButtonText: 'Lanjutkan',
-                    cancelButtonText: 'Batal',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const id = $(this).data('id');
-                        const form = $('#bpl_form_delete');
-                        form.attr('action', `/bpl/${id}`);
-                        form.trigger('submit');
-                        form.preventDefault();
-                    }
-                });
-            });
-        })
-    </script>
+        });
+    })
+</script>
 @endpush

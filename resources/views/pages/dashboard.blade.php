@@ -3,12 +3,13 @@
 @section('title', 'Dashbard')
 
 @section('content')
-    <div class="pt-4">
+    <div>
+        <h4 class="mt-4 text-xl font-medium mb-4">Dashboard</h4>
         <div id="countdown-banner" tabindex="-1"
-            class="sticky top-12 z-40 flex flex-1 flex-col md:flex-row justify-between p-4 bg-white border border-gray-200 rounded-lg dark:bg-clay dark:border-gray-700 mb-4">
+            class="sticky top-12 z-40 flex flex-1 flex-col mb-10 md:flex-row justify-between p-4 bg-white border border-gray-200 rounded-lg dark:bg-clay dark:border-gray-700">
             <div class="flex flex-col items-start mb-3 me-4 md:items-center md:flex-row md:mb-0 w-full">
                 <div
-                    class="w-8 h-8 rounded-full bg-red-600 mr-4 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400 ">
+                    class="w-8 h-8 mb-6 sm:mb-0 rounded-full bg-red-600 mr-4 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400 ">
                     <i class="fa-solid fa-hourglass-start text-md text-white"></i>
                 </div>
                 <div>
@@ -28,12 +29,11 @@
                 </button>
             </div>
         </div>
-        <h4 class="mt-4 text-xl font-medium mb-4">Dashboard</h4>
         <div class="flex gap-4 flex-wrap">
             <div
                 class="bg-white border border-gray-200 dark:border-gray-700 dark:bg-clay py-4 px-6 rounded-lg w-full sm:w-max flex items-center gap-4">
                 <div
-                    class="w-10 h-10 rounded-full bg-red-600 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400">
+                    class="w-10 h-10 aspect-square rounded-full bg-red-600 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400">
                     <i class="fa-solid fa-helmet-safety text-xl text-white"></i>
                 </div>
                 <div>
@@ -44,7 +44,7 @@
             <div
                 class="bg-white border border-gray-200 dark:border-gray-700 dark:bg-clay py-4 px-6 rounded-lg w-full sm:w-max flex items-center gap-4">
                 <div
-                    class="w-10 h-10 rounded-full bg-red-600 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400">
+                    class="w-10 h-10 aspect-square rounded-full bg-red-600 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400">
                     <i class="fa-regular fa-calendar text-xl text-white"></i>
                 </div>
                 <div>
@@ -55,12 +55,49 @@
             <div
                 class="bg-white border border-gray-200 dark:border-gray-700 dark:bg-clay py-4 px-6 rounded-lg w-full sm:w-max flex items-center gap-4">
                 <div
-                    class="w-10 h-10 rounded-full bg-red-600 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400">
+                    class="w-10 h-10 aspect-square rounded-full bg-red-600 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400">
                     <i class="fa-regular fa-calendar-check text-xl text-white"></i>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Tanggal Selesai</p>
-                    <p class="font-medium">{{ $project->planned_date }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Tanggal Finish</p>
+                    <p class="font-medium">{{ $project->planned_finish }}</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-8 gap-4">
+            <div
+                class="bg-white border border-gray-200 dark:border-gray-700 dark:bg-clay py-4 px-6 rounded-lg w-full flex flex-col gap-6">
+                <div
+                    class="w-10 h-10 aspect-square rounded-full mt-[6px] ml-[6px] bg-red-600 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400">
+                    <i class="fa-solid fa-cart-shopping text-xl text-white"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Jumlah Order</p>
+                    <p class="font-medium">{{ $total_order }} Order</p>
+                </div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 dark:border-gray-700 dark:bg-clay py-4 px-6 rounded-lg w-full flex flex-col gap-6">
+                <div
+                    class="w-10 h-10 mt-[6px] ml-[6px] aspect-square rounded-full bg-red-600 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400">
+                    <i class="fa-solid fa-cart-plus text-xl text-white"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Order</p>
+                    <p class="font-medium currency">Rp {{ $order_total_price }}</p>
+                </div>
+            </div>
+            <div
+                class="bg-white border border-gray-200 dark:border-gray-700 dark:bg-clay py-4 px-6 rounded-lg w-full flex flex-col gap-6">
+                <div
+                    class="w-10 h-10 mt-[6px] ml-[6px] aspect-square rounded-full bg-red-600 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400">
+                    <i class="fa-solid fa-cart-arrow-down text-xl text-white"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Order Diterima</p>
+                    <p class="font-medium currency">Rp {{ $received_total_price }}</p>
                 </div>
             </div>
         </div>
@@ -69,6 +106,17 @@
 @push('scripts')
     <script>
         $(function() {
+            function priceFormatter(price) {
+                price = price.replace(/[^0-9]/g, '');
+                return price.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            }
+
+            $('.currency').each(function() {
+                const currency = $(this).text();
+                const formattedCurrency = priceFormatter(currency);
+                $(this).text(`Rp ${formattedCurrency}`)
+            })
+
             $('#countdown').text("Loading ...");
             const project = @json($project);
             if (project.planned_finish) {

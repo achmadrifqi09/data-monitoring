@@ -13,17 +13,15 @@ return new class extends Migration
     {
         Schema::create('bpl', function (Blueprint $table) {
             $table->id();
-            $table->string('item_name');
-            $table->string('unit')->nullable();
-            $table->float('volume')->nullable();
+            $table->string('bpl_number')->unique();
             $table->integer('partner_id')->nullable();
             $table->integer('order_id')->nullable();
-            $table->bigInteger('price')->nullable();
+            $table->string('description')->nullable();
+            $table->date('date_of_use')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
-            $table->index('item_name');
-            $table->index('unit');
+            $table->index('bpl_number');
             $table->index('partner_id');
             $table->index('order_id');
             $table->index('deleted_at');

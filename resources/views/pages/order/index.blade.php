@@ -89,7 +89,7 @@
                             <td class="px-6 py-4">
                                 <div class="flex gap-4">
                                     <a href="/order/{{ $order->id }}"
-                                        class="edit-button font-semibold text-green-600 dark:text-green-400">
+                                        class="edit-button font-semibold text-gray-500 dark:text-gray-400">
                                         <i class="fa-solid fa-circle-info text-base"></i>
                                     </a>
                                     <button
@@ -134,10 +134,9 @@
 
                 $('tr').each(function() {
                     const finishDateText = $(this).find('.finish-date').text();
-
                     if (finishDateText) {
                         const daysLeft = calculateDays(finishDateText);
-                        if (daysLeft < 0) {
+                        if (daysLeft <= 0) {
                             $(this).find('.status-cell').html(`
                                 <span class="bg-red-600 text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded">Close</span>
                             `);

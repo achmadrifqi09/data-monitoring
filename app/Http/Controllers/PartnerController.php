@@ -84,6 +84,7 @@ class PartnerController extends Controller
             Partner::where('id', $id)
                 ->update([
                     'name' => $data['name'],
+                    'phone_number' => $data['phone_number'],
                     'address' => $data['address'],
                 ]);
             notify()->success('Data rekanan berhasil diupdate', 'Berhasil');
@@ -115,6 +116,7 @@ class PartnerController extends Controller
         $validator = Validator::make($input, [
             'name' => 'required|min:4',
             'address' => 'nullable',
+            'phone_number' => 'nullable',
         ], ['name.required' => 'Nama rekanan harus diisi', 'name.min' => 'Nama rekanan minimal 4 karakter']);
 
         if ($validator->fails()) {
