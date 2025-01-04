@@ -53,8 +53,8 @@
                 <tr>
                     <th scope="col" class="w-16 px-6 py-3">No</th>
                     <th scope="col" class="px-6 py-3">Nama Rekanan</th>
-                    <th scope="col" class="px-6 py-3">Alamat</th>
                     <th scope="col" class="px-6 py-3">No HP/Kontak</th>
+                    <th scope="col" class="px-6 py-3">Alamat</th>
                     <th scope="col" class="px-6 py-3">Aksi</th>
                 </tr>
             </thead>
@@ -116,7 +116,8 @@
                 <form action="/partner" method="post">
                     @csrf
                     <x-input-label id="name" label="Nama Rekanan" name="name" placeholder="Masukkan nama rekanan" />
-                    <x-input-label type="number" id="phone_number" label="Nomor Hp" name="phone_number" placeholder="Masukkan nomor hp/kotak" />
+                    <x-input-label type="number" id="phone_number" label="Nomor Hp" name="phone_number"
+                        placeholder="Masukkan nomor hp/kotak" />
                     <x-input-label id="address" label="Alamat Rekanan" name="address"
                         placeholder="Masukkan alamat rekanan" />
                     <div class="mt-6 flex w-full justify-end p-0">
@@ -133,7 +134,7 @@
                     <x-input-label id="update_name" label="Nama Rekanan" name="name"
                         placeholder="Masukkan nama rekanan" />
                     <x-input-label type="number" id="update_phone_number" label="Nomor Hp" name="phone_number"
-                                   placeholder="Masukkan alamat rekanan" />
+                        placeholder="Masukkan alamat rekanan" />
                     <x-input-label id="update_address" label="Alamat Rekanan" name="address"
                         placeholder="Masukkan alamat rekanan" />
                     <div class="mt-6 flex w-full justify-end p-0">
