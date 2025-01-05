@@ -19,6 +19,10 @@ return new class extends Migration {
             $table->string('nominal');
             $table->date('date_received');
             $table->timestamps();
+
+            $table->index('bpl_number');
+            $table->index('item_id');
+            $table->index('order_id');
         });
     }
 

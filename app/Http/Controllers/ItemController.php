@@ -39,7 +39,7 @@ class ItemController extends Controller
 
             notify()->success('Berhasil menambahkan item BPL', 'Berhasil');
             return redirect()->back();
-        } catch (ValidationException|\Exception $e) {
+        } catch (ValidationException | \Exception $e) {
             notify()->error($e->getMessage(), 'Gagal');
             return redirect()->back();
         }
@@ -80,7 +80,7 @@ class ItemController extends Controller
 
             notify()->success('Berhasil menambahkan item BPL', 'Berhasil');
             return redirect()->back();
-        } catch (ValidationException|\Exception $e) {
+        } catch (ValidationException | \Exception $e) {
             notify()->error($e->getMessage(), 'Gagal');
             return redirect()->back();
         }

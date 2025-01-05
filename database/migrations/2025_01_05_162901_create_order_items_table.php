@@ -29,6 +29,10 @@ return new class extends Migration
             $table->double('volume');
             $table->string('price');
             $table->timestamps();
+
+            $table->index('order_id');
+            $table->index('item_id');
+            $table->index('bpl_number');
         });
     }
 

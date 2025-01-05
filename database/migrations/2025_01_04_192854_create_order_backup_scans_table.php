@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('document');
             $table->softDeletes();
             $table->timestamps();
+
+            $table->index('order_id');
         });
     }
 

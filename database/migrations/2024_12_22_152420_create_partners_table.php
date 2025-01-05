@@ -21,6 +21,9 @@ return new class extends Migration
             $table->index('name');
             $table->index('address');
             $table->index('deleted_at');
+
+            $table->index('name');
+            $table->index('phone_number');
         });
     }
 

@@ -27,6 +27,7 @@ return new class extends Migration
 
             $table->index('po_number');
             $table->index('deleted_at');
+            $table->index('partner_id');
             $table->timestamps();
             $table->softDeletes();
         });
