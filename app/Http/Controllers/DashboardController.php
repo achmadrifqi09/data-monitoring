@@ -11,7 +11,6 @@ class DashboardController extends Controller
     {
         $project = Project::first();
         $receivedTotalPrice = DB::table('item_receiveds')
-            ->whereNull('deleted_at')
             ->sum(DB::raw('CAST(nominal AS DECIMAL(10,2))'));
 
         $orderTotalPrice = DB::table('order_items')
