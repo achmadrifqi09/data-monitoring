@@ -6,7 +6,7 @@
     <div>
         <h4 class="mt-4 text-xl font-medium mb-4">Dashboard</h4>
         <div id="countdown-banner" tabindex="-1"
-            class="sticky top-12 z-40 flex flex-1 flex-col mb-10 md:flex-row justify-between p-4 bg-white border border-gray-200 rounded-lg dark:bg-clay dark:border-gray-700">
+            class="sticky top-12 z-0 flex flex-1 flex-col mb-10 md:flex-row justify-between p-4 bg-white border border-gray-200 rounded-lg dark:bg-clay dark:border-gray-700">
             <div class="flex flex-col items-start mb-3 me-4 md:items-center md:flex-row md:mb-0 w-full">
                 <div
                     class="w-8 h-8 mb-6 sm:mb-0 rounded-full bg-red-600 mr-4 flex justify-center items-center ring-[6px] dark:ring-red-800 ring-red-400 ">

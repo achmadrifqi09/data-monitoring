@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bpl', function (Blueprint $table) {
+        Schema::create('bpl_has_orders', function (Blueprint $table) {
             $table->id();
-            $table->string('bpl_number')->unique();
-            $table->string('description')->nullable();
-            $table->date('date_of_use')->nullable();
-            $table->timestamps();
+            $table->string('bpl_number');
+            $table->integer('order_id');
+            $table->integer('partner_id');
             $table->softDeletes();
-
-            $table->index('bpl_number');
-            $table->index('deleted_at');
+            $table->timestamps();
         });
     }
 
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('bpl');
+        Schema::dropIfExists('bpl_has_orders');
     }
 };

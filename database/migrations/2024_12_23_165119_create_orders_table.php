@@ -14,14 +14,18 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->string('po_number');
-            $table->integer('partner_id');
+            $table->foreignId('partner_id')
+                ->nullable()
+                ->constrained('partners')
+                ->onUpdate('cascade')
+                ->onDelete('cascade')
+                ->nullOnDelete();
             $table->string('description')->nullable();
             $table->date('po_date');
             $table->date('start_date');
             $table->date('finish_date');
 
             $table->index('po_number');
-            $table->index('partner_id');
             $table->index('deleted_at');
             $table->timestamps();
             $table->softDeletes();

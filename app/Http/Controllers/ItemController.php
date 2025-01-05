@@ -23,7 +23,9 @@ class ItemController extends Controller
     public function getItemByBPLNumber(string $bpl_number)
     {
         $items = Item::where('bpl_number', $bpl_number)
-            ->whereNull('deleted_at')->get();
+            ->whereNull('deleted_at')
+            ->doesntHave('order_item')
+            ->get();
         return response()->json($items);
     }
 
@@ -37,7 +39,7 @@ class ItemController extends Controller
 
             notify()->success('Berhasil menambahkan item BPL', 'Berhasil');
             return redirect()->back();
-        } catch (ValidationException | \Exception $e) {
+        } catch (ValidationException|\Exception $e) {
             notify()->error($e->getMessage(), 'Gagal');
             return redirect()->back();
         }
@@ -78,7 +80,7 @@ class ItemController extends Controller
 
             notify()->success('Berhasil menambahkan item BPL', 'Berhasil');
             return redirect()->back();
-        } catch (ValidationException | \Exception $e) {
+        } catch (ValidationException|\Exception $e) {
             notify()->error($e->getMessage(), 'Gagal');
             return redirect()->back();
         }

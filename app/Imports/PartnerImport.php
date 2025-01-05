@@ -19,6 +19,7 @@ class PartnerImport implements ToModel
         return new Partner([
             'name' => $row[0],
             'address' => $row[1],
+            'phone_number' => $row[2] ?? null,
         ]);
     }
 }

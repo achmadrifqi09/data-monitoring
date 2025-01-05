@@ -16,7 +16,7 @@
                 class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6 p-4 border border-dashed rounded-lg dark:border-gray-600 border-gray-300">
                 <x-input-label id="item_name-0" label="Nama Item *" name="items[0][item_name]" placeholder="Masukkan nama item"
                     required :isSpaceY="false" />
-                <x-input-label id="unit-0" label="Unit" name="items[0][unit]" placeholder="Masukkan unit"
+                <x-input-label id="unit-0" label="Satuan" name="items[0][unit]" placeholder="Masukkan unit"
                     :isSpaceY="false" />
                 <x-input-label id="brand-0" label="Merk" name="items[0][brand]" placeholder="Masukkan merk"
                     :isSpaceY="false" />
@@ -42,7 +42,7 @@
                         class="relative grid grid-cols-1 md:grid-cols-3 gap-4 my-6 p-4 border border-dashed rounded-lg dark:border-gray-600 border-gray-300">
                         <x-input-label id="item_name-${counter}" label="Nama Item *" name="items[${counter}][item_name]" placeholder="Masukkan nama item"
                             required :isSpaceY="false" />
-                        <x-input-label id="unit-${counter}" label="Unit" name="items[${counter}][unit]" placeholder="Masukkan unit"
+                        <x-input-label id="unit-${counter}" label="Satuan" name="items[${counter}][unit]" placeholder="Masukkan unit"
                             :isSpaceY="false" />
                         <x-input-label id="brand-${counter}" label="Merk" name="items[${counter}][brand]" placeholder="Masukkan merk"
                             :isSpaceY="false" />

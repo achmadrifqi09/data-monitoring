@@ -4,20 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\OrderRequest;
 use App\Models\BPL;
-use App\Models\Item;
 use App\Models\ItemReceived;
 use App\Models\Order;
 use App\Models\OrderBackupScan;
+use App\Models\OrderItem;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class OrderController extends Controller
 {
@@ -25,10 +25,7 @@ class OrderController extends Controller
     {
         $search = $request->input('search');
         $alert = $request->input('alert');
-        $orderQuery = Order::whereNull('deleted_at')
-            ->with(['partner' => function ($query) {
-                $query->select(['id', 'name']);
-            }]);
+        $orderQuery = Order::whereNull('deleted_at');
 
         if ($search) {
             $orderQuery->where(function ($query) use ($search) {
@@ -54,14 +51,16 @@ class OrderController extends Controller
                 }
             });
         }
-        $orders = $orderQuery->paginate(15);
+        $orders = $orderQuery->with(['partner' => function ($query) {
+            $query->select('id', 'name');
+        }])->paginate(15);
 
         return view('pages.order.index', [
             'orders' => $orders
         ]);
     }
 
-    public function uploadDocument(Request $request, int $orderId)
+    public function uploadDocument(Request $request, int $orderId): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
             'order_document' => [
@@ -101,7 +100,7 @@ class OrderController extends Controller
         return redirect()->back();
     }
 
-    function deleteBackupScanDoc(int $id)
+    function deleteBackupScanDoc(int $id): RedirectResponse
     {
         $backupScan = OrderBackupScan::find($id);
 
@@ -122,9 +121,8 @@ class OrderController extends Controller
     public function show(int $id): View
     {
         $order = Order::where('id', $id)
-            ->with(['partner', 'bpl.items' => function ($query) {
-                $query->where('is_selected', true)
-                    ->whereNull('deleted_at');
+            ->with(['order_items' => function ($query) {
+                $query->with('item');
             }, 'order_backup_scans'])
             ->first();
         $itemReceived = ItemReceived::where('order_id', $id)->with('item')->orderBy('date_received', 'desc')->get();
@@ -143,22 +141,48 @@ class OrderController extends Controller
     {
         $validatedData = $request->validated();
 
+        $partnerId = $validatedData['partner_id'];
         $order = Order::create([
             'po_number' => $validatedData['po_number'],
-            'partner_id' => $validatedData['partner_id'],
             'description' => $validatedData['description'],
+            'partner_id' => $partnerId,
             'po_date' => $validatedData['po_date'],
             'start_date' => $validatedData['start_date'],
             'finish_date' => $validatedData['finish_date'],
         ]);
 
-        $this->bulkUpdateBPL($validatedData['bpl'], $order->id, $order->partner_id);
+        $this->bulkCreateOrderItem($validatedData['bpl'], $partnerId, $order->id);
 
         notify()->success('Data order telah ditambahkan', 'Berhasil');
         return redirect('/order');
     }
 
-    public function destroy($id)
+
+    private function bulkCreateOrderItem(array $BPLs, int $partnerId, int $oderId): void
+    {
+        if (empty($BPLs)) {
+            return;
+        }
+        $finalPayload = [];
+
+        foreach ($BPLs as $BPL) {
+            foreach ($BPL['items'] as $item) {
+                if ($item['volume']) {
+                    $finalPayload[] = [
+                        'order_id' => $oderId,
+                        'item_id' => $item['id'],
+                        'bpl_number' => $BPL['bpl_number'],
+                        'partner_id' => $partnerId,
+                        'volume' => doubleval($item['volume']),
+                        'price' => $item['price'],
+                    ];
+                }
+            }
+        }
+        OrderItem::insert($finalPayload);
+    }
+
+    public function destroy($id): RedirectResponse
     {
         $order = Order::find($id);
         if (!$order) {
@@ -166,7 +190,19 @@ class OrderController extends Controller
             return redirect()->back();
         }
 
-        BPL::where('order_id', $id)->delete();
+        $documents = OrderBackupScan::where('order_id', $id)->get();
+        if ($documents) {
+            foreach ($documents as $document) {
+                if (Storage::exists($document->document)) {
+                    Storage::delete($document->document);
+                }
+                $document->delete();
+            }
+        }
+
+        OrderItem::where('order_id', $id)->delete();
+        ItemReceived::where('order_id', $order->id)->delete();
+
         $order->delete();
 
         notify()->success('Order telah dihapus', 'Berhasil');
@@ -177,11 +213,9 @@ class OrderController extends Controller
     {
         try {
             $validator = Validator::make($request->input(), [
-                'item_name' => 'required|min:2',
                 'price' => 'required',
                 'volume' => 'required',
             ], [
-                'item_name.required' => 'Nama item harus diisi',
                 'item_name.min' => 'Nama item minimal 2 karakter',
                 'price.required' => 'Harga item harus diisi',
                 'volume.required' => 'Volume item harus diisi',
@@ -194,11 +228,15 @@ class OrderController extends Controller
                 ]);
             }
 
-            Item::where('id', $itemId)->update([
-                'item_name' => $request->input('item_name'),
+            $orderItem = OrderItem::where('item_id', $itemId)->update([
                 'price' => (int)$request->input('price'),
                 'volume' => floatval($request->input('volume')),
             ]);
+
+            if (empty($orderItem)) {
+                notify()->error('Data order item tidak ditemukan', 'Gagal');
+                return redirect()->back();
+            }
 
             notify()->success('Data item berhasil diperbarui', 'Berhasil');
             return redirect()->back();
@@ -208,60 +246,7 @@ class OrderController extends Controller
         }
     }
 
-
-    // public function addItem(Request $request, int $id)
-    // {
-    //     try {
-    //         $validator = Validator::make($request->input(), [
-    //             'bpl_number' => 'required',
-    //             'item_name' => 'required|min:4',
-    //             'brand' => 'nullable',
-    //             'unit' => 'nullable',
-    //             'specification' => 'nullable',
-    //             'volume' => 'required',
-    //             'price' => 'required',
-    //             'is_selected' => 'required',
-    //         ], [
-    //             'bpl_number.required' => 'Nomor BPL harus diisi',
-    //             'item_name.required' => 'Nama item harus diisi',
-    //             'item_name.min' => 'Nama item minimal 4 karakter',
-    //             'volume.required' => 'Volume harus diisi',
-    //             'price.required' => 'Volume harus diisi',
-    //         ]);
-
-    //         if ($validator->fails()) {
-    //             $error = $validator->errors()->first();
-    //             throw ValidationException::withMessages([
-    //                 'message' => $error,
-    //             ]);
-    //         }
-
-    //         $bpl = BPL::where('bpl_number', $request->input('bpl_number'))->first();
-    //         if (!$bpl) {
-    //             notify()->error('BPL tidak ditemukan', 'Gagal');
-    //             return redirect()->back();
-    //         }
-
-    //         Item::create([
-    //             'bpl_number' => $request->input('bpl_number'),
-    //             'item_name' => $request->input('item_name'),
-    //             'unit' => $request->input('unit'),
-    //             'brand' => $request->input('brand'),
-    //             'price' => $request->input('price'),
-    //             'specification' => $request->input('specification'),
-    //             'volume' => $request->input('volume'),
-    //             'is_selected' => $request->has('is_selected') ? 1 : 0,
-    //         ]);
-
-    //         notify()->success('Berhasil manambahkan item', 'Berhasil');
-    //         return redirect()->back();
-    //     } catch (ValidationException $e) {
-    //         notify()->error($e->getMessage(), 'Gagal');
-    //         return redirect()->back();
-    //     }
-    // }
-
-    public function addBPLForm(int $id): View | RedirectResponse
+    public function addBPLForm(int $id): View|RedirectResponse
     {
         $order = Order::find($id);
         if (!$order) {
@@ -274,11 +259,16 @@ class OrderController extends Controller
         ]);
     }
 
-    public function addBPL(Request $request, int $id)
+    public function addBPL(Request $request, int $id): RedirectResponse
     {
         try {
             $data = $this->addBPLValidation($request);
-            $this->bulkUpdateBPL($data['bpl'], $id, $data['partner_id']);
+            $order = Order::find($id);
+            if (!$order) {
+                notify()->error('Data order tidak ditemukan', 'Gagal');
+                return redirect()->back();
+            }
+            $this->bulkCreateOrderItem($data['bpl'], $data['partner_id'], $id);
 
             notify()->success('Berhasil manambahkan BPL', 'Berhasil');
             return redirect("/order/$id");
@@ -288,7 +278,10 @@ class OrderController extends Controller
         }
     }
 
-    private function addBPLValidation(Request $request)
+    /**
+     * @throws ValidationException
+     */
+    private function addBPLValidation(Request $request): array
     {
         $rules = [
             'partner_id' => 'required',
@@ -324,17 +317,17 @@ class OrderController extends Controller
         return $request->except('_token');
     }
 
+
     public function destroyItem(int $orderId, int $itemId): RedirectResponse
     {
-        $item = Item::find($itemId);
+        $orderItem = OrderItem::where('item_id', $itemId)->where('order_id', $orderId)->first();
 
-        if (!$item) {
+        if (!$orderItem) {
             notify()->error('Item yang anda hapus tidak ditemukan', 'Gagal');
             return redirect()->back();
         }
-        $item->is_selected = 0;
-        $item->save();
-        $item->delete();
+
+        $orderItem->delete();
 
         notify()->success('Berhasil menghapus item', 'Berhasil');
         return redirect()->back();

@@ -7,11 +7,13 @@ use App\Models\Item;
 use App\Models\ItemReceived;
 use App\Models\Order;
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class ItemReceivedController extends Controller
 {
-    public function form(Request $request)
+    public function form(Request $request): View|RedirectResponse
     {
         $orderId = $request->query('order_id');
         if (!$orderId) {
@@ -25,19 +27,11 @@ class ItemReceivedController extends Controller
             return redirect()->back();
         }
 
-        $BPLs = BPL::where('order_id', $orderId)
-            ->whereNull('deleted_at')
-            ->with([
-                'items' => function ($query) {
-                    $query->where('is_selected', 1)
-                        ->whereNull('deleted_at')
-                        ->with([
-                            'item_receiveds' => function ($query) {
-                                $query->whereNull('deleted_at');
-                            }
-                        ]);
-                }
-            ])
+        $BPLs = BPL::with(['items' => function ($query) use ($orderId) {
+            $query->whereHas('order_item', function ($query) use ($orderId) {
+                $query->where('order_id', $orderId);
+            });
+        }])
             ->get();
 
         return view('pages.order.item-received-form', [
@@ -46,7 +40,8 @@ class ItemReceivedController extends Controller
             'order_id' => $order->id,
         ]);
     }
-    public function store(Request $request)
+
+    public function store(Request $request): RedirectResponse
     {
         try {
             $payload = [];
@@ -62,8 +57,8 @@ class ItemReceivedController extends Controller
                             'bpl_number' => $inputItem['bpl_number'],
                             'item_id' => (int)$item['item_id'],
                             'order_id' => (int)$orderId,
-                            'amount_received' => (int)$item['amount_received'],
-                            'date_received' =>  $item['received_date'],
+                            'amount_received' => doubleval($item['amount_received']),
+                            'date_received' => $item['received_date'],
                             'nominal' => floatval($item['amount_received']) * intval($item['price'])
                         ];
                     }
@@ -75,9 +70,7 @@ class ItemReceivedController extends Controller
                 return redirect()->back();
             }
 
-            $items = Item::whereIn('id', $itemIds)->with(['item_receiveds' => function ($query) {
-                $query->whereNull('deleted_at');
-            }])->get();
+            $items = Item::whereIn('id', $itemIds)->with(['item_receiveds', 'order_item'])->get();
 
             foreach ($payload as $payloadItem) {
                 foreach ($items as $item) {
@@ -86,9 +79,8 @@ class ItemReceivedController extends Controller
                         foreach ($item->item_receiveds as $itemReceived) {
                             $volumeUsed += $itemReceived->amount_received;
                         }
-                        $volumeUsed += (int)$payloadItem['amount_received'];
-                        if ($volumeUsed > $item->volume) {
-
+                        $volumeUsed += doubleval($payloadItem['amount_received']);
+                        if ($volumeUsed > $item->order_item->volume) {
                             throw new Exception("Item diterima melebihi volume order (Item $item->id)");
                         }
                     }
@@ -103,7 +95,7 @@ class ItemReceivedController extends Controller
         }
     }
 
-    public function destroy(int $id)
+    public function destroy(int $id): RedirectResponse
     {
         $itemReceived = ItemReceived::find($id);
 

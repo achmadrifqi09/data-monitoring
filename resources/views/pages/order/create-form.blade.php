@@ -15,26 +15,26 @@
                 @csrf
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
                     <x-input-label id="po_number" label="Nomor PO *" name="po_number" placeholder="Masukkan nomor PO"
-                        :isSpaceY="false" value="{{ old('po_number') }}" required />
+                                   :isSpaceY="false" value="{{ old('po_number') }}" required/>
                     <div class="w-full text-mirage">
                         <label for="partner_id" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
                             Rekanan *
                         </label>
                         <select class=partner_id" id="partner_id" name="partner_id" required></select>
                         @error('partner_id')
-                            <p class="mt-2 text-sm text-red-600 dark:dark:text-gray-400 hover:dark:text-white">
-                                {{ $message }}
-                            </p>
+                        <p class="mt-2 text-sm text-red-600 dark:dark:text-gray-400 hover:dark:text-white">
+                            {{ $message }}
+                        </p>
                         @enderror
                     </div>
                     <x-input-label id="description" label="Uraian" name="description" placeholder="Masukkan uraian"
-                        :isSpaceY="false" value="{{ old('description') }}" />
+                                   :isSpaceY="false" value="{{ old('description') }}"/>
                     <x-input-label id="po_date" type="date" label="Tanggal PO *" name="po_date" :isSpaceY="false"
-                        value="{{ old('po_date') }}" required />
+                                   value="{{ old('po_date') }}" required/>
                     <x-input-label id="start_date" type="date" label="Start *" name="start_date" :isSpaceY="false"
-                        value="{{ old('po_start') }}" required />
+                                   value="{{ old('po_start') }}" required/>
                     <x-input-label id="finish_date" type="date" label="Finish *" name="finish_date" :isSpaceY="false"
-                        value="{{ old('po_finish') }}" required />
+                                   value="{{ old('po_finish') }}" required/>
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul class="space-y-2">
@@ -57,11 +57,11 @@
                             <div id="bpl-container-0">
                                 <div class="w-full text-mirage selected-container">
                                     <label for="bpl-0"
-                                        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                                           class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
                                         BPL Ke-1
                                     </label>
                                     <select class="items" id="bpl-0" name="bpl[0][bpl_number]"
-                                        data-container-id="0"></select>
+                                            data-container-id="0"></select>
                                 </div>
                             </div>
                         </div>
@@ -77,19 +77,19 @@
 
 @push('scripts')
     <script>
-        $(function() {
+        $(function () {
             $('#partner_id').select2({
                 ajax: {
                     url: '{{ route('partner.api.get') }}',
                     delay: 350,
                     dataType: 'json',
-                    data: function(params) {
+                    data: function (params) {
                         const query = {
                             search: params.term,
                         }
                         return query;
                     },
-                    processResults: function(data) {
+                    processResults: function (data) {
                         const result = data?.map((partner) => {
                             return {
                                 id: partner.id,
@@ -109,15 +109,14 @@
                     url: '/api/bpl?not_used=1',
                     delay: 350,
                     dataType: 'json',
-                    data: function(params) {
+                    data: function (params) {
                         const query = {
                             search: params.term,
                         }
                         return query;
                     },
-                    processResults: function(data) {
-                        const bpl = data?.data;
-                        const result = bpl?.map((bpl) => {
+                    processResults: function (data) {
+                        const result = data?.map((bpl) => {
                             return {
                                 id: bpl.bpl_number,
                                 text: `${bpl?.bpl_number} ${bpl.description || ''} ${bpl?.date_of_use || ''}`
@@ -131,7 +130,7 @@
                 }
             });
 
-            defaultBPLSelect.on("change", async function(e) {
+            defaultBPLSelect.on("change", async function (e) {
                 const bplNumber = e.target.value;
                 const items = await getItemOfBPL(bplNumber);
                 const containerId = $(this).data('container-id');
@@ -158,7 +157,7 @@
                     const container = $(`#bpl-container-${containerId}`);
                     container.find('.field-container').remove();
 
-                    data.forEach(function(item, index) {
+                    data.forEach(function (item, index) {
                         const newInputRow = `
                             <div class="flex flex-col md:items-center md:flex-row gap-4 relative my-6 field-container">
                                 <input
@@ -172,7 +171,7 @@
                                 <x-input-label id="item-name-${counter}-${index}" type="text" label="Nama Item"
                                     name="bpl[${counter}][items][${index}][item_name]" value="${item?.item_name}" class="disabled:cursor-not-allowed"
                                     :isSpaceY="false" disabled/>
-                                <x-input-label id="volume-${counter}-${index}" type="number" label="Volume"
+                                <x-input-label id="volume-${counter}-${index}" type="number" step="0.01" label="Volume"
                                     name="bpl[${counter}][items][${index}][volume]"
                                     :isSpaceY="false"/>
                                 <x-input-label id="price-${counter}-${index}" type="number" label="Harga"
@@ -182,7 +181,7 @@
                         container.append(newInputRow);
                     });
 
-                    $("input[type='checkbox']").on('change', function() {
+                    $("input[type='checkbox']").on('change', function () {
                         const fieldIdentifier = $(this).data('field-id');
                         if ($(this).is(":checked")) {
                             $(`#volume-${fieldIdentifier}`).attr('required', true);
@@ -195,7 +194,7 @@
                 }
             }
 
-            $('#add-row').on('click', function() {
+            $('#add-row').on('click', function () {
                 const itemContainer = $('#items-container');
                 counter++;
                 const elements = `
@@ -217,13 +216,13 @@
                 itemContainer.append(elements);
                 generateOptions(`bpl-${counter}`);
 
-                $('.remove-field-row').on('click', function() {
+                $('.remove-field-row').on('click', function () {
                     const containerId = $(this).data('container-id');
                     if (counter > 0) counter--;
                     $(`#${containerId}`).remove()
                 });
 
-                $(`#bpl-${counter}`).on("change", async function(e) {
+                $(`#bpl-${counter}`).on("change", async function (e) {
                     const bplNumber = e.target.value;
                     const containerId = $(this).data('container-id');
                     const items = await getItemOfBPL(bplNumber);
@@ -237,15 +236,14 @@
                         url: '/api/bpl?not_used=1',
                         delay: 350,
                         dataType: 'json',
-                        data: function(params) {
+                        data: function (params) {
                             const query = {
                                 search: params.term,
                             }
                             return query;
                         },
-                        processResults: function(data) {
-                            const bpl = data?.data;
-                            const result = bpl?.map((bpl) => {
+                        processResults: function (data) {
+                            const result = data?.map((bpl) => {
                                 return {
                                     id: bpl.bpl_number,
                                     text: `${bpl?.bpl_number} ${bpl.description || ''} ${bpl?.date_of_use || ''}`

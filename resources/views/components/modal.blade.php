@@ -2,24 +2,30 @@
     'title' => 'Modal',
     'id',
 ])
-<div id="{{ $id }}" tabindex="-1" aria-hidden="true"
-    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="fixed bg-black opacity-30 w-screen h-dvh"></div>
-    <div class="relative p-4 w-full max-h-full">
-        <div class="relative bg-white rounded-lg shadow dark:bg-clay sm:max-w-screen-sm mx-auto">
-            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 mx-auto">
+<div
+    id="{{ $id }}"
+    tabindex="-1"
+    aria-hidden="true"
+    class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0"
+>
+    <div class="fixed h-dvh w-screen bg-black opacity-30"></div>
+    <div class="relative max-h-full w-full p-4">
+        <div class="relative mx-auto rounded-lg bg-white shadow dark:bg-clay sm:max-w-screen-sm">
+            <div class="mx-auto flex items-center justify-between rounded-t border-b p-4 dark:border-gray-600 md:p-5">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
                     {{ $title }}
                 </h3>
-                <button type="button"
-                    class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                    data-modal-hide="{{ $id }}">
+                <button
+                    type="button"
+                    class="end-2.5 ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+                    data-modal-hide="{{ $id }}"
+                >
                     x
                     <span class="sr-only">Close modal</span>
                 </button>
             </div>
 
-            <div class="p-4 h-max max-h-[80dvh] sm:max-h-[72dvh] overflow-y-scroll">
+            <div class="h-max max-h-[80dvh] overflow-y-auto p-4 sm:max-h-[72dvh]">
                 @if (isset($content))
                     {{ $content }}
                 @endif

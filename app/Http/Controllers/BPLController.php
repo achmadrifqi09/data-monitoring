@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Imports\BPLImport;
 use App\Models\BPL;
 use App\Models\Item;
-use App\Models\Order;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +17,16 @@ class BPLController extends Controller
 {
     public function index(Request $request): View
     {
-        $bpl = $this->getBpl($request);
+        $search = $request->input('search');
+        $bplQuery = BPL::whereNull('deleted_at');
+
+        if ($search) {
+            $bplQuery->where('bpl_number', 'like', '%' . $search . '%')
+                ->orWhereHas('items', function ($query) use ($search) {
+                    $query->where('description', 'like', '%' . $search . '%');
+                });
+        }
+        $bpl = $bplQuery->paginate(15);
         return view('pages.bpl.index', [
             'bpl' => $bpl,
         ]);
@@ -26,7 +34,9 @@ class BPLController extends Controller
 
     public function show(int $id): View
     {
-        $bpl = BPL::where('id', $id)->with('items')->first();
+        $bpl = BPL::where('id', $id)
+            ->with(['items.order_item'])
+            ->first();
 
         return view('pages.bpl.detail', [
             'bpl' => $bpl,
@@ -161,9 +171,10 @@ class BPLController extends Controller
     public function getBpl(Request $request): mixed
     {
         $search = $request->input('search');
-        $notUsedStatus = $request->query('not_used');
-        $orderId = $request->query('order');
-        $bplQuery = BPL::whereNull('deleted_at');
+        $bplQuery = BPL::whereNull('deleted_at')
+            ->whereHas('items', function ($query) {
+                $query->doesntHave('order_item');
+            });
 
         if ($search) {
             $bplQuery->where('bpl_number', 'like', '%' . $search . '%')
@@ -172,15 +183,8 @@ class BPLController extends Controller
                 });
         }
 
-        if ($notUsedStatus && $notUsedStatus === '1') {
-            $bplQuery->whereNull('order_id');
-        }
-
-        if ($orderId) {
-            $bplQuery->where('order_id', $orderId)
-                ->orWhere('order_id', null);
-        }
-
-        return $bplQuery->with('items')->paginate(15);
+        return $bplQuery
+            ->get()
+            ->take(15);
     }
 }

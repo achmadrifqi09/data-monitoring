@@ -21,11 +21,8 @@ return new class extends Migration
                 ->onUpdate('cascade');
             $table->string('item_name');
             $table->string('unit')->nullable();
-            $table->float('volume')->nullable();
-            $table->string('price')->nullable();
             $table->string('brand')->nullable();
             $table->string('specification')->nullable();
-            $table->boolean('is_selected')->default(false);
             $table->softDeletes();
             $table->timestamps();
 

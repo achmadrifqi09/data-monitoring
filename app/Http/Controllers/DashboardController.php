@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
 use App\Models\Project;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -16,10 +14,8 @@ class DashboardController extends Controller
             ->whereNull('deleted_at')
             ->sum(DB::raw('CAST(nominal AS DECIMAL(10,2))'));
 
-        $orderTotalPrice = DB::table('items')
-            ->whereNull('deleted_at')
+        $orderTotalPrice = DB::table('order_items')
             ->sum(DB::raw('CAST(price AS DECIMAL(10,2)) * volume'));
-
 
         $totalOrder = DB::table('orders')
             ->whereNull('deleted_at')

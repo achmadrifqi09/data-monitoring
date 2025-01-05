@@ -19,6 +19,11 @@ class Order extends Model
         return $this->hasMany(BPL::class);
     }
 
+    public function order_items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class, 'order_id', 'id');
+    }
+
     public function partner(): BelongsTo
     {
         return $this->belongsTo(Partner::class);

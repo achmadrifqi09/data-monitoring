@@ -5,32 +5,39 @@
 @section('content')
     <div>
         <h4 class="mt-4 text-xl font-medium">Formulir Tambah BPL</h4>
-        <p class="text-sm dark:text-gray-300">
-            Tambah BPL ke order {{ $order->po_number }}
-        </p>
+        <p class="text-sm dark:text-gray-300">Tambah BPL ke order {{ $order->po_number }}</p>
         <div class="mt-6">
             <form method="post" action="/order/{{ $order->id }}/bpl">
                 @csrf
-                <input hidden="text" value="{{ $order->partner->id }}" name="partner_id">
+                <input hidden="text" value="{{ $order->partner->id }}" name="partner_id" />
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
                     <div
-                        class="w-full p-4 border rounded-lg border-dashed border-gray-300  dark:border-gray-600 sm:col-span-2">
-                        <p class="font-medium text-sm mb-4">Tambah BPL *</p>
+                        class="w-full rounded-lg border border-dashed border-gray-300 p-4 dark:border-gray-600 sm:col-span-2"
+                    >
+                        <p class="mb-4 text-sm font-medium">Tambah BPL *</p>
                         <button
-                            class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-white"
-                            type="button" id="add-row">
+                            class="me-2 rounded bg-red-100 px-2.5 py-0.5 text-sm font-medium text-red-800 dark:bg-red-900 dark:text-white"
+                            type="button"
+                            id="add-row"
+                        >
                             Tambah Field BPL
                         </button>
 
                         <div class="mt-4 space-y-12 md:space-y-4" id="items-container">
                             <div id="bpl-container-0">
-                                <div class="w-full text-mirage selected-container">
-                                    <label for="bpl-0"
-                                        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                                <div class="selected-container w-full text-mirage">
+                                    <label
+                                        for="bpl-0"
+                                        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                                    >
                                         BPL Ke-1
                                     </label>
-                                    <select class="items" id="bpl-0" name="bpl[0][bpl_number]"
-                                        data-container-id="0"></select>
+                                    <select
+                                        class="items"
+                                        id="bpl-0"
+                                        name="bpl[0][bpl_number]"
+                                        data-container-id="0"
+                                    ></select>
                                 </div>
                             </div>
                         </div>
@@ -46,22 +53,21 @@
 
 @push('scripts')
     <script>
-        $(function() {
+        $(function () {
             const defaultBPLSelect = $('#bpl-0');
             defaultBPLSelect.select2({
                 ajax: {
                     url: '/api/bpl?order={{ $order->id }}',
                     delay: 350,
                     dataType: 'json',
-                    data: function(params) {
+                    data: function (params) {
                         const query = {
                             search: params.term,
                         }
                         return query;
                     },
-                    processResults: function(data) {
-                        const bpl = data?.data;
-                        const result = bpl?.map((bpl) => {
+                    processResults: function (data) {
+                        const result = data?.map((bpl) => {
                             return {
                                 id: bpl.bpl_number,
                                 text: `${bpl?.bpl_number} ${bpl.description || ''} ${bpl?.date_of_use || ''}`
@@ -75,7 +81,7 @@
                 }
             });
 
-            defaultBPLSelect.on("change", async function(e) {
+            defaultBPLSelect.on("change", async function (e) {
                 const bplNumber = e.target.value;
                 const items = await getItemOfBPL(bplNumber);
                 const containerId = $(this).data('container-id');
@@ -102,7 +108,7 @@
                     const container = $(`#bpl-container-${containerId}`);
                     container.find('.field-container').remove();
 
-                    data.forEach(function(item, index) {
+                    data.forEach(function (item, index) {
                         const newInputRow = `
                             <div class="flex flex-col md:items-center md:flex-row gap-4 relative my-6 field-container">
                                 <input
@@ -113,27 +119,27 @@
                                     class="h-4 w-4 md:mt-4 rounded border-gray-300 bg-gray-100 text-red-600 focus:ring-2 focus:ring-red-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-red-600"
                                 />
                                 <input type="number" name="bpl[${counter}][items][${index}][id]" value="${item.id}" hidden>
-                                <x-input-label 
-                                    id="item-name-${counter}-${index}" 
+                                <x-input-label
+                                    id="item-name-${counter}-${index}"
                                     type="text" label="Nama Item"
                                     name="bpl[${counter}][items][${index}][item_name]"
-                                    value="${item?.item_name}" 
+                                    value="${item?.item_name}"
                                     class="disabled:cursor-not-allowed"
-                                    :isSpaceY="false" 
+                                    :isSpaceY="false"
                                     disabled
                                     />
-                                <x-input-label 
+                                <x-input-label
                                     id="volume-${counter}-${index}"
                                     type="number"
                                     label="Volume"
                                     name="bpl[${counter}][items][${index}][volume]"
                                     :isSpaceY="false"
                                     />
-                                <x-input-label 
+                                <x-input-label
                                     id="price-${counter}-${index}"
                                     type="number"
                                     label="Harga"
-                                    name="bpl[${counter}][items][${index}][price]" 
+                                    name="bpl[${counter}][items][${index}][price]"
                                     :isSpaceY="false"
                                     />
                             </div>
@@ -143,7 +149,7 @@
                         }
                     });
 
-                    $("input[type='checkbox']").on('change', function() {
+                    $("input[type='checkbox']").on('change', function () {
                         const fieldIdentifier = $(this).data('field-id');
                         if ($(this).is(":checked")) {
                             $(`#volume-${fieldIdentifier}`).attr('required', true);
@@ -156,7 +162,7 @@
                 }
             }
 
-            $('#add-row').on('click', function() {
+            $('#add-row').on('click', function () {
                 const itemContainer = $('#items-container');
                 counter++;
                 const elements = `
@@ -178,13 +184,13 @@
                 itemContainer.append(elements);
                 generateOptions(`bpl-${counter}`);
 
-                $('.remove-field-row').on('click', function() {
+                $('.remove-field-row').on('click', function () {
                     const containerId = $(this).data('container-id');
                     if (counter > 0) counter--;
                     $(`#${containerId}`).remove()
                 });
 
-                $(`#bpl-${counter}`).on("change", async function(e) {
+                $(`#bpl-${counter}`).on("change", async function (e) {
                     const bplNumber = e.target.value;
                     const containerId = $(this).data('container-id');
                     const items = await getItemOfBPL(bplNumber);
@@ -198,15 +204,14 @@
                         url: '/api/bpl?order={{ $order->id }}',
                         delay: 350,
                         dataType: 'json',
-                        data: function(params) {
+                        data: function (params) {
                             const query = {
                                 search: params.term,
                             }
                             return query;
                         },
-                        processResults: function(data) {
-                            const bpl = data?.data;
-                            const result = bpl?.map((bpl) => {
+                        processResults: function (data) {
+                            const result = data?.map((bpl) => {
                                 return {
                                     id: bpl.bpl_number,
                                     text: `${bpl?.bpl_number} ${bpl.description || ''} ${bpl?.date_of_use || ''}`
