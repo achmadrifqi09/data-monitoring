@@ -53,6 +53,18 @@ class UserAccessSeeder extends Seeder
             'project_update',
             'project_delete',
         ],
+        'BILL' => [
+            'bill_view',
+            'bill_create',
+            'bill_update',
+            'bill_delete'
+        ],
+        'PAYMENT' => [
+            'payment_view',
+            'payment_create',
+            'payment_update',
+            'payment_delete'
+        ]
     ];
 
     private const ROLES = [

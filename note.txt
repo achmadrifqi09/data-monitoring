@@ -1,0 +1,21 @@
+ return DB::table('item_receiveds')
+            ->where('item_receiveds.order_id', $order_id)
+            ->join('items', 'item_receiveds.item_id', '=', 'items.id')
+            ->join('bill_items', 'bill_items.item_id', '=', 'items.id')
+            ->join('order_items', 'order_items.item_id', '=', 'items.id')
+            ->select(
+                'item_receiveds.item_id',
+                'items.item_name',
+                'order_items.price',
+                'order_items.volume',
+                DB::raw('SUM(item_receiveds.amount_received) as total_amount_received'),
+                DB::raw('SUM(bill_items.total_item_billed) as total_item_billed')
+            )
+            ->groupBy(
+                'item_receiveds.item_id',
+                'items.item_name',
+                'order_items.price',
+                'order_items.volume'
+            )
+            ->havingRaw('SUM(item_receiveds.amount_received) < SUM(bill_items.total_item_billed)')
+            ->get();

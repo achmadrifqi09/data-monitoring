@@ -38,4 +38,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderBackupScan::class, 'order_id');
     }
+
+    public function bills(): HasMany
+    {
+        return $this->hasMany(Bill::class, 'order_id');
+    }
 }

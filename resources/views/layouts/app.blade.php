@@ -31,6 +31,9 @@
     @notifyJs
     <script src="{{ asset('js/global/jquery-3.3.1.min.js') }}"></script>
     <script src="{{ asset('js/global/select2.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone-with-data-2012-2022.min.js">
+    </script>
     @stack('scripts')
 </body>
 

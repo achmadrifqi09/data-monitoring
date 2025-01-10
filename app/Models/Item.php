@@ -28,6 +28,11 @@ class Item extends Model
         return $this->hasMany(ItemReceived::class, 'item_id');
     }
 
+    public function bill_items(): HasMany
+    {
+        return $this->hasMany(BillItem::class, 'item_id');
+    }
+
     public function order_item(): HasOne
     {
         return $this->hasOne(OrderItem::class, 'item_id', 'id');

@@ -42,4 +42,12 @@ Route::middleware(['auth', 'prevent_back_history'])->group(function () {
     Route::prefix('document')->group(function () {
         require __DIR__ . '/modules/document.php';
     });
+
+    Route::prefix('bill')->group(function () {
+        require __DIR__ . '/modules/bill.php';
+    });
+
+    Route::prefix('payment')->group(function () {
+        require __DIR__ . '/modules/payment.php';
+    });
 });

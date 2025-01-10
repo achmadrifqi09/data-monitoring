@@ -9,7 +9,10 @@ use App\Models\Order;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+
+use function PHPSTORM_META\type;
 
 class ItemReceivedController extends Controller
 {
@@ -27,11 +30,15 @@ class ItemReceivedController extends Controller
             return redirect()->back();
         }
 
-        $BPLs = BPL::with(['items' => function ($query) use ($orderId) {
-            $query->whereHas('order_item', function ($query) use ($orderId) {
-                $query->where('order_id', $orderId);
-            });
-        }])
+        $BPLs = BPL::whereHas('items.order_item', function ($query) use ($orderId) {
+            $query->where('order_id', $orderId);
+        })
+            ->with(['items' => function ($query) use ($orderId) {
+                $query->whereHas('order_item', function ($query) use ($orderId) {
+                    $query->where('order_id', $orderId);
+                })
+                    ->with('item_receiveds');
+            }])
             ->get();
 
         return view('pages.order.item-received-form', [
@@ -39,6 +46,55 @@ class ItemReceivedController extends Controller
             'po_number' => $order->po_number,
             'order_id' => $order->id,
         ]);
+    }
+
+
+    public function getItemReceivedByOrderId(int $order_id)
+    {
+        $queryResult = DB::select("
+            SELECT 
+                IR.item_id, 
+                I.item_name, 
+                ORIT.price,
+                COALESCE(SUM(IR.amount_received), 0) AS total_amount_received,
+                COALESCE(BIL.billed_item, 0) AS total_item_billed,
+                COALESCE(SUM(ORIT.volume), 0) AS total_volume
+            FROM 
+                item_receiveds AS IR
+            LEFT JOIN 
+                items AS I ON IR.item_id = I.id
+            LEFT JOIN (
+                SELECT 
+                    BI.item_id, 
+                    SUM(BI.total_item_billed) AS billed_item
+                FROM 
+                    bill_items BI
+                GROUP BY 
+                    BI.item_id
+            ) AS BIL ON I.id = BIL.item_id
+            LEFT JOIN (
+                SELECT 
+                    OI.item_id, 
+                    OI.price,
+                    SUM(OI.volume) AS volume
+                FROM 
+                    order_items AS OI
+                GROUP BY 
+                    OI.item_id, OI.price
+            ) AS ORIT ON IR.item_id = ORIT.item_id
+            WHERE 
+                IR.order_id = :order_id
+            GROUP BY 
+                IR.item_id, I.item_name, BIL.billed_item, ORIT.price
+        ", ['order_id' => $order_id]);
+
+        foreach ($queryResult as $key => $result) {
+            if ($result->total_amount_received == $result->total_item_billed) {
+                unset($queryResult[$key]);
+            }
+        }
+
+        return $queryResult;
     }
 
     public function store(Request $request): RedirectResponse

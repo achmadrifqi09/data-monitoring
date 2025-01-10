@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
-    public function orderDocument(Request $request)
+    public function __invoke(Request $request)
     {
         abort_if(Auth::guest(), Response::HTTP_FORBIDDEN);
         $path = $request->query('path');

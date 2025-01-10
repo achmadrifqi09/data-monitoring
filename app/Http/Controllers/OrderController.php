@@ -60,6 +60,25 @@ class OrderController extends Controller
         ]);
     }
 
+    public function getOrder(Request $request)
+    {
+        $search = $request->input('search');
+        $orderQuery = Order::whereNull('deleted_at')
+            ->whereHas('item_receiveds');
+
+        if ($search) {
+            $orderQuery->where('po_number', 'like', '%' . $search . '%')
+                ->orWhereHas('partner', function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                });
+        }
+
+        return $orderQuery
+            ->with('partner')
+            ->get()
+            ->take(15);
+    }
+
     public function uploadDocument(Request $request, int $orderId): RedirectResponse
     {
         $validator = Validator::make($request->all(), [

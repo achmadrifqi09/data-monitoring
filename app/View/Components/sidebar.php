@@ -16,7 +16,10 @@ class sidebar extends Component
         ['label' => 'BPL', 'path' => '/bpl', 'routeName' => 'bpl', 'icon' => 'fa-solid fa-hammer', 'permission' => 'bpl_view'],
         ['label' => 'Rekanan', 'path' => '/partner', 'routeName' => 'partner', 'icon' => 'fa-solid fa-people-group', 'permission' => 'partner_view'],
         ['label' => 'Order', 'path' => '/order', 'routeName' => 'order', 'icon' => 'fa-solid fa-cart-shopping', 'permission' => 'order_view'],
+        ['label' => 'Tagihan', 'path' => '/bill', 'routeName' => 'bill', 'icon' => 'fa-solid fa-file-invoice-dollar', 'permission' => 'bill_view'],
+        ['label' => 'Pembayaran', 'path' => '/payment', 'routeName' => 'payment', 'icon' => 'fa-solid fa-money-check-dollar', 'permission' => 'payment_view'],
     ];
+
     public function __construct()
     {
         //
