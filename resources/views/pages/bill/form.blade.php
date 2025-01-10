@@ -53,9 +53,9 @@
                         <x-input-label id="bap" name="date_of_bap" type="date" label="Tanggal BAP*"
                             :isSpaceY="false" required />
                         <x-input-label id="retention" name="retention" label="Rentensi*" :isSpaceY="false" required />
-                        <x-input-label id="ppn" name="ppn" step="0.01" type="number" label="PPN*"
+                        <x-input-label id="ppn" name="ppn" step="0.000000000001" type="number" label="PPN*"
                             :isSpaceY="false" required />
-                        <x-input-label id="pph" name="pph" step="0.01" type="number" label="PPH*"
+                        <x-input-label id="pph" name="pph" step="0.000000000001" type="number" label="PPH*"
                             :isSpaceY="false" required />
                         <x-input-label id="receipt_date" name="receipt_date" type="date" label="Tgl Kuitansi*"
                             :isSpaceY="false" required />
@@ -91,7 +91,6 @@
                 const orderId = e.target.value;
                 $('#order-id').val(orderId);
                 const itemReceiveds = await getItemReceived(orderId);
-                console.log(itemReceiveds)
                 generateBillItemField(itemReceiveds, orderId);
             });
 
@@ -116,7 +115,7 @@
                                     class="disabled:cursor-not-allowed" value="${item.total_amount_received}"/>
                                <div class"relative">
                                     <x-input-label id="total_item_billed_${index}" name="bill_items[${index}][total_item_billed]" label="Jumlah item ditagih" type="number"
-                                        step="0.01" min="0" max="${item.volume}" class="total_item_billed" data-field-container-id="bill-fileds-container-${index}"/>
+                                        step="0.000000000001" min="0" max="${item.volume}" class="total_item_billed" data-field-container-id="bill-fileds-container-${index}"/>
                                 </div>
                             </div>
                             `;
@@ -124,16 +123,24 @@
                         })
                         container.append(
                             '<h6 class="text-base w-full text-end" id="total-bill">Total Tagihan Rp. 0</h6>');
-                        $('.total_item_billed').on('change', function() {
-                            const input = $(this)
-                            const containerFieldId = input.data('field-container-id')
 
-                            const containerField = $(`#${containerFieldId}`)
-                            const price = containerField.find('.price').val();
-                            totalBill += Number(price) * parseFloat($(this).val())
-                            $('#total-bill').text(
-                                `Total Tagihan Rp. ${priceFormatter(totalBill.toString())}`)
-                            $('#raw_bill_total').val(totalBill.toString())
+                        function recalculateTotal() {
+                            let newTotal = 0;
+                            $('.total_item_billed').each(function() {
+                                const containerFieldId = $(this).data('field-container-id');
+                                const containerField = $(`#${containerFieldId}`);
+                                const price = Number(containerField.find('.price').val());
+                                const quantity = parseFloat($(this).val()) || 0;
+                                newTotal += price * quantity;
+                            });
+
+                            totalBill = newTotal; // Update total keseluruhan
+                            $('#total-bill').text(`Total Tagihan Rp. ${priceFormatter(totalBill.toString())}`);
+                            $('#raw_bill_total').val(totalBill.toString());
+                        }
+
+                        $('.total_item_billed').on('change', function() {
+                            recalculateTotal();
                         })
                     } else {
                         alertComponent.text('Tidak ada item yang perlu dibayar')

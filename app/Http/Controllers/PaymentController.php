@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Bill;
+use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentInstallment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -40,14 +41,10 @@ class PaymentController extends Controller
 
     public function show(int $id)
     {
-
         $payment = Payment::where('id', $id)
             ->with([
                 'order' => function ($query) {
                     $query->select('id', 'po_number');
-                },
-                'bill' => function ($query) {
-                    $query->select('id', 'bap', 'netto');
                 },
                 'payment_installments'
             ])
@@ -62,22 +59,28 @@ class PaymentController extends Controller
     {
         try {
             $this->validateData($request);
-            $bill = Bill::find($request->input('bill_id'));
-            if (!$bill) {
-                notify()->error('Data tagihan tidak ditemukan', 'Gagal');
+            $order = Order::find($request->input('order_id'));
+            $netto = DB::table('bills')
+                ->where('order_id', $request->input('order_id'))
+                ->sum(DB::raw('CAST(netto AS DECIMAL(30,2))'));
+
+            if (!$order) {
+                notify()->error('Data order tidak ditemukan', 'Gagal');
+                return redirect()->back();
+            }
+            if (floatval($netto) == 0) {
+                notify()->error('Setidaknya harus satu tagihan', 'Gagal');
                 return redirect()->back();
             }
 
             $paymentTotal = floatval($request->input('payment_total'));
-            $netto = floatval($bill->netto);
 
             $paymentPercentage = round(($paymentTotal / $netto) * 100, 1);
             $loanTotal = 0;
             if ($paymentTotal < $netto) $loanTotal = $netto - $paymentTotal;
 
             $payment = Payment::create([
-                'order_id' => $bill->order_id,
-                'bill_id' => $bill->id,
+                'order_id' => $order->id,
                 'payment_total' =>  $paymentTotal,
                 'payment_percentage' => $paymentPercentage,
                 'loan_total' => $loanTotal
@@ -122,7 +125,9 @@ class PaymentController extends Controller
         $totalNominalPayment = floatval($payment->payment_total) - floatval($paymentInstallment->nominal_payment);
         $finalTotalNominalPayment = $totalNominalPayment + floatval($data['payment_total']);
 
-        $netto = floatval($payment->bill->netto);
+        $netto = DB::table('bills')
+            ->where('order_id', $payment->order_id)
+            ->sum(DB::raw('CAST(netto AS DECIMAL(30,2))'));
         $paymentPercentage = round(($finalTotalNominalPayment / $netto) * 100, 1);
 
         $loanTotal = 0;
@@ -165,11 +170,15 @@ class PaymentController extends Controller
                 notify()->error('Data pembayaran tidak ditemukan', 'Gagal');
                 return redirect()->back();
             }
-
             $totalNominalPayment = PaymentInstallment::where('payment_id', $payment->id)
                 ->sum('nominal_payment');
+
             $paymentTotal = floatval($totalNominalPayment) + floatval($data['payment_total']);
-            $netto = floatval($payment->bill->netto);
+
+            $netto = DB::table('bills')
+                ->where('order_id', $payment->order_id)
+                ->sum(DB::raw('CAST(netto AS DECIMAL(30,2))'));
+
             $paymentPercentage = round(($paymentTotal / $netto) * 100, 1);
             $loanTotal = 0;
             if ($paymentTotal < $netto) $loanTotal = $netto - $paymentTotal;
@@ -217,7 +226,10 @@ class PaymentController extends Controller
 
         $totalNominalPayment = floatval($payment->payment_total) - floatval($paymentInstallment->nominal_payment);
 
-        $netto = floatval($payment->bill->netto);
+        $netto = DB::table('bills')
+            ->where('order_id', $payment->order_id)
+            ->sum(DB::raw('CAST(netto AS DECIMAL(30,2))'));
+
         $paymentPercentage = round(($totalNominalPayment / $netto) * 100, 1);
 
         $loanTotal = 0;
@@ -255,11 +267,11 @@ class PaymentController extends Controller
 
         if ($request->path() !== '/payment/installment') {
             $rules[] = [
-                'bill_id' => 'required|numeric',
+                'order_id' => 'required|numeric',
             ];
             $messages[] = [
-                'bill_id.required' => 'Tagihan harus diisi',
-                'bill_id.numeric' => 'Tagihan tidak valid',
+                'order_id.required' => 'Order harus diisi',
+                'order_id.numeric' => 'Order tidak valid',
             ];
         }
 

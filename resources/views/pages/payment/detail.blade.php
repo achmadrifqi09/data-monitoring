@@ -12,14 +12,6 @@
                     <p class="text-sm font-medium">{{ $payment->order->po_number }}</p>
                 </div>
                 <div>
-                    <p class="mb-1.5 text-sm text-gray-500 dark:text-gray-400">Nomor BAP :</p>
-                    <p class="text-sm font-medium">{{ $payment->bill->bap ?? '-' }}</p>
-                </div>
-                <div>
-                    <p class="mb-1.5 text-sm text-gray-500 dark:text-gray-400">Netto</p>
-                    <p class="text-sm font-medium price">{{ $payment->bill->netto }}</p>
-                </div>
-                <div>
                     <p class="mb-1.5 text-sm text-gray-500 dark:text-gray-400">Total Pembayaran</p>
                     <p class="text-sm font-medium price">{{ $payment->payment_total }}</p>
                 </div>
@@ -130,6 +122,7 @@
                         <input type="number" name="payment_id" value="{{ $payment->id }}" hidden>
                         <x-input-label id="payment_total" name="payment_total" label="Jumlah Bayar *" type="number" required />
                         <x-input-label id="payment_date" name="payment_date" label="Tanggal Bayar *" type="date" required />
+                        <span class="block text-xs -mt-2 mb-4 payment-loan">Hutang {{ $payment->loan_total }}</span>
                         <div class="relative">
                             <label class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
                                 Bukti Bayar (Gambar)
@@ -175,6 +168,9 @@
                         <input type="number" name="payment_id" value="{{ $payment->id }}" hidden>
                         <x-input-label id="payment_total_update" name="payment_total" label="Jumlah Bayar *" type="number"
                             required />
+                        <span class="block text-xs -mt-2 mb-4 payment-loan">
+                            {{ $payment->loan_total }}
+                        </span>
                         <x-input-label id="payment_date_update" name="payment_date" label="Tanggal Bayar *" type="date"
                             required />
                         <div class="relative">
@@ -208,6 +204,11 @@
             $('.price').each(function() {
                 const price = priceFormatter($(this).text())
                 $(this).text(`Rp ${price}`)
+            });
+
+            $('.payment-loan').each(function() {
+                const price = priceFormatter($(this).text())
+                $(this).text(`Hutang Rp ${price}`)
             });
         });
     </script>

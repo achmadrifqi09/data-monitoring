@@ -17,10 +17,6 @@ return new class extends Migration
                 ->constrained('orders')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-            $table->foreignId('bill_id')
-                ->constrained('bills')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
             $table->string('payment_total');
             $table->double('payment_percentage');
             $table->string('loan_total');

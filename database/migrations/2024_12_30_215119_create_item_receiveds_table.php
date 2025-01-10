@@ -13,7 +13,10 @@ return new class extends Migration {
         Schema::create('item_receiveds', function (Blueprint $table) {
             $table->id();
             $table->string('bpl_number');
-            $table->integer('item_id');
+            $table->foreignId('item_id')
+                ->constrained('items')
+                ->onDelete('cascade')
+                ->onUpdate('cascade');
             $table->integer('order_id');
             $table->double('amount_received');
             $table->string('nominal');

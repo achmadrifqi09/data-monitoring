@@ -51,7 +51,6 @@
                 <tr>
                     <th scope="col" class="w-16 px-6 py-3">No</th>
                     <th scope="col" class="px-6 py-3">No PO</th>
-                    <th scope="col" class="px-6 py-3">NO BAP</th>
                     <th scope="col" class="px-6 py-3">Bayar</th>
                     <th scope="col" class="px-6 py-3">Hutang</th>
                     <th scope="col" class="px-6 py-3">Bayar%</th>
@@ -62,8 +61,7 @@
                 @forelse ($payments as $payment)
                     <tr class="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-clay dark:hover:bg-clay/80">
                         <td class="w-16 px-6 py-4">{{ $loop->iteration }}</td>
-                        <td class="min-w-[8em] px-6 py-4">{{ $payment->order->po_number }}</td>
-                        <td class="min-w-[12em] px-6 py-4">{{ $payment->bill->bap }}</td>
+                        <td class="min-w-[8em] px-6 py-4">{{ $payment->order->po_number ?? '-' }}</td>
                         <td class="min-w-[12em] px-6 py-4 price">
                             {{ $payment->payment_total ?? '-' }}
                         </td>
@@ -95,29 +93,6 @@
         @if (!$payments->isEmpty())
             {{ $payments->links() }}
         @endif
-        @can('bpl_import')
-            <x-modal id="import-bpl" title="Import BPL">
-                <x-slot name="content">
-                    <form action="/bpl/import" method="post" enctype="multipart/form-data">
-                        @csrf
-                        <div class="relative">
-                            <label class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                                Pilih file excel
-                            </label>
-                            <input id="excel_file" type="file" name="excel_file"
-                                class="w-full rounded-md border border-gray-300 text-gray-900 dark:border-gray-600 dark:text-gray-300" />
-                        </div>
-                        <p class="mt-1 text-sm font-medium italic text-gray-500 dark:text-gray-300">
-                            *Pastikan nama item BPL tidak ada yang kosong, jika nama rekanan kosong akan dilewati pada
-                            baris tersebut
-                        </p>
-                        <div class="mt-6 flex w-full justify-end p-0">
-                            <x-button type="submit" class="mr-0 w-auto">Submit</x-button>
-                        </div>
-                    </form>
-                </x-slot>
-            </x-modal>
-        @endcan
         @can('payment_delete')
             <form id="payment-delete" method="POST">
                 @method('delete')
@@ -132,19 +107,19 @@
                     <form action="/payment" method="POST" class="w-full" enctype="multipart/form-data">
                         @csrf
                         <div class="w-full text-mirage">
-                            <label for="bill_id" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                                Tagihan *
+                            <label for="order_id" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                                Order *
                             </label>
-                            <select class=bill_id" id="bill_id" name="bill_id" required></select>
-                            @error('bill_id')
+                            <select class=order_id" id="order_id" name="order_id" required></select>
+                            @error('order_id')
                                 <p class="mt-2 text-sm text-red-600 dark:dark:text-gray-400 hover:dark:text-white">
                                     {{ $message }}
                                 </p>
                             @enderror
                         </div>
                         <x-input-label id="payment_total" name="payment_total" label="Jumlah Bayar *" type="number" required />
-                        <x-input-label id="payment_date" name="payment_date" label="Tanggal Bayar *" type="date"
-                            required />
+                        <span class="block text-xs -mt-2 mb-4" id="total-netto"></span>
+                        <x-input-label id="payment_date" name="payment_date" label="Tanggal Bayar *" type="date" required />
                         <div class="relative">
                             <label class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
                                 Bukti Bayar (Gambar)
@@ -162,37 +137,54 @@
             </x-modal>
         @endcan
     </div>
-
-
 @endsection
 
 @push('scripts')
     @can('payment_create')
         <script>
-            $('#bill_id').select2({
-                ajax: {
-                    url: '{{ route('bill.api.get') }}',
-                    delay: 350,
-                    dataType: 'json',
-                    data: function(params) {
-                        const query = {
-                            search: params.term,
-                        }
-                        return query;
-                    },
-                    processResults: function(data) {
-                        const result = data?.map((bill) => {
-                            return {
-                                id: bill.id,
-                                text: `${bill.bap} - ${ bill.date_of_bap}`
+            $(function() {
+                $('#order_id').select2({
+                    ajax: {
+                        url: '/api/order?total_bill=1',
+                        delay: 350,
+                        dataType: 'json',
+                        data: function(params) {
+                            const query = {
+                                search: params.term,
                             }
-                        })
-                        return {
-                            results: result
-                        };
+                            return query;
+                        },
+                        processResults: function(data) {
+                            const result = data?.map((order) => {
+                                return {
+                                    id: order.id,
+                                    text: `${order.po_number} - ${ order.po_date}`,
+                                    data: {
+                                        netto: order.total_netto,
+                                    },
+                                }
+                            })
+                            return {
+                                results: result
+                            };
+                        },
+                        cache: true
                     },
-                    cache: true
-                }
+                    escapeMarkup: function(markup) {
+                        return markup;
+                    }
+                });
+                $('#order_id').on('select2:select', function(e) {
+                    const data = e.params.data;
+                    const netto = data.data.netto;
+                    const formattedNetto = (price) => {
+                        price = price.replace(/[^0-9]/g, '');
+                        return price.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    }
+                    $('#total-netto').text(`Netto Rp ${formattedNetto(netto.toString())}`)
+                });
+
+
             });
         </script>
     @endcan

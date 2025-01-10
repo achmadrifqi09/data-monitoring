@@ -142,7 +142,7 @@ class BillController extends Controller
 
         $receivedTotalPrice = DB::table('item_receiveds')
             ->where('order_id', $validatedData['order_id'])
-            ->sum(DB::raw('CAST(nominal AS DECIMAL(10,2))'));
+            ->sum(DB::raw('CAST(nominal AS DECIMAL(30,2))'));
         $order = Order::find($validatedData['order_id']);
 
         if (!$order) {
@@ -165,7 +165,7 @@ class BillController extends Controller
         if (floatval($validatedData['raw_bill_total']) > floatval($receivedTotalPrice)) {
             notify()
                 ->error(
-                    "Nominal yang ditagihkan harus kurang atau sama dengan $$receivedTotalPrice",
+                    "Nominal yang ditagihkan harus kurang atau sama dengan $receivedTotalPrice",
                     'Gagal'
                 );
             return redirect()->back();
@@ -416,12 +416,11 @@ class BillController extends Controller
             ->groupBy(
                 'bill_items.item_id',
             )->get();
-
         foreach ($billedItems as $billedItem) {
             $toBeBilled = floatval($billedItem['total_item_billed']);
             foreach ($billItems as $billItem) {
                 if ((int)$billedItem['item_id'] === $billItem->item_id) $toBeBilled += floatval($billItem->total_item_billed);
-                if ($toBeBilled > $billItem->total_amount_received) return false;
+                if ($toBeBilled > $billItem->total_amount_received && (int)$billedItem['item_id'] === $billItem->item_id) return false;
             }
         }
         return true;

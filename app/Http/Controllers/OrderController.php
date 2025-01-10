@@ -63,6 +63,7 @@ class OrderController extends Controller
     public function getOrder(Request $request)
     {
         $search = $request->input('search');
+        $isTotalBill = $request->input('total_bill');
         $orderQuery = Order::whereNull('deleted_at')
             ->whereHas('item_receiveds');
 
@@ -71,6 +72,13 @@ class OrderController extends Controller
                 ->orWhereHas('partner', function ($query) use ($search) {
                     $query->where('name', 'like', '%' . $search . '%');
                 });
+        }
+
+        if ($isTotalBill) {
+            $orderQuery->leftJoin('bills', 'orders.id', '=', 'bills.order_id')
+                ->select('orders.*', DB::raw('SUM(bills.netto) as total_netto'))
+                ->groupBy('orders.id')
+                ->havingRaw('SUM(bills.netto) > 0');
         }
 
         return $orderQuery
@@ -352,53 +360,5 @@ class OrderController extends Controller
         return redirect()->back();
     }
 
-    private function bulkUpdateBPL(array $BPLs, int $orderId, int $partnerId): void
-    {
-        if (empty($BPLs)) {
-            return;
-        }
-
-        $cases = [];
-        $volumeCases = [];
-        $ids = [];
-        $params = [];
-        $bplNumbers = [];
-        $volumeParams = [];
-
-        foreach ($BPLs as $bpl) {
-            foreach ($bpl['items'] as $item) {
-                if (isset($item['is_selected'])) {
-                    $id = (int)$item['id'];
-                    $price = (int)$item['price'];
-                    $volume = floatval($item['volume']);
-
-                    $cases[] = "WHEN {$id} THEN ?";
-                    $params[] = $price;
-
-                    $volumeCases[] = "WHEN {$id} THEN ?";
-                    $volumeParams[] = $volume;
-
-                    $ids[] = $id;
-                    if (!in_array($bpl['bpl_number'], $bplNumbers)) $bplNumbers[] = $bpl['bpl_number'];
-                }
-            }
-        }
-
-        if (empty($ids)) {
-            return;
-        }
-
-        BPL::whereIn('bpl_number', $bplNumbers)->update([
-            'order_id' => $orderId,
-            'partner_id' => $partnerId,
-        ]);
-
-        DB::update("
-            UPDATE items
-            SET is_selected = ?,
-                price = CASE id " . implode(' ', $cases) . " END,
-                volume = CASE id " . implode(' ', $volumeCases) . " END
-            WHERE id IN (" . implode(',', $ids) . ")
-        ", array_merge([1], $params, $volumeParams));
-    }
+    public function getDataWithBill() {}
 }

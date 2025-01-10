@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ItemRequest;
 use App\Models\Item;
+use App\Models\ItemReceived;
+use App\Models\OrderItem;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -66,17 +68,17 @@ class ItemController extends Controller
         try {
             $data = $this->singleValidation($request);
 
-            $bpl = Item::where('id', $id)
+            $item = Item::where('id', $id)
                 ->whereNull('deleted_at')
                 ->first();
 
-            if (!$bpl) {
+            if (!$item) {
                 notify()->error('Item yang diupdate tidak ditemukan', 'Gagal');
                 return redirect()->back();
             }
 
-            $bpl->fill($data);
-            $bpl->save();
+            $item->fill($data);
+            $item->save();
 
             notify()->success('Berhasil menambahkan item BPL', 'Berhasil');
             return redirect()->back();
@@ -88,16 +90,16 @@ class ItemController extends Controller
 
     public function destroy(string $bpl_number, int $id): RedirectResponse
     {
-        $bpl = Item::where('id', $id)
+        $item = Item::where('id', $id)
             ->whereNull('deleted_at')
             ->first();
 
-        if (!$bpl) {
+        if (!$item) {
             notify()->error('Item yang diupdate tidak ditemukan', 'Gagal');
             return redirect()->back();
         }
 
-        $bpl->delete();
+        $item->delete();
         notify()->success('Berhasil menghapus item BPL', 'Berhasil');
         return redirect()->back();
     }

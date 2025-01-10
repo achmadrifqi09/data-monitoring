@@ -39,8 +39,9 @@
                                 <div class="relative">
                                     <x-input-label type="number"
                                         name="bpl[{{ $loop->parent->iteration - 1 }}][items][{{ $loop->iteration - 1 }}][amount_received]"
-                                        id="amount_received_{{ $loop->iteration - 1 }}" min="0" step="0.01"
-                                        max="{{ $item->order_item->volume }}" label="Volume Diterima" :isSpaceY="false" />
+                                        id="amount_received_{{ $loop->iteration - 1 }}" min="0"
+                                        step="0.000000000001" max="{{ $item->order_item->volume }}" label="Volume Diterima"
+                                        :isSpaceY="false" />
 
                                     <div class="flex py-1.5 px-1 absolute right-2 top-8 bg-gray-700">
                                         <span>
